@@ -1,0 +1,3322 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  user-select: none;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: #14222c;
+  font-family: "STKaiti", "Kaiti SC", "KaiTi", "Songti SC", "PingFang SC", "Microsoft YaHei", serif;
+  color: #f4f7f5;
+  -webkit-font-smoothing: antialiased;
+}
+
+#gl-canvas {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  cursor: grab;
+}
+
+#gl-canvas:active {
+  cursor: grabbing;
+}
+
+#nametag-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 14;
+}
+
+.hidden {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+
+.view-hidden {
+  display: none !important;
+}
+
+/* Top-Left Protagonist HP & MP Bars */
+.player-vitals {
+  position: fixed;
+  top: 20px;
+  left: 24px;
+  width: 236px;
+  padding: 10px 13px;
+  border-radius: 11px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  background: linear-gradient(180deg, rgba(14, 28, 36, 0.76) 0%, rgba(10, 20, 28, 0.84) 100%);
+  border: 1px solid rgba(228, 214, 168, 0.30);
+  box-shadow: 0 8px 24px rgba(4, 12, 18, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(6px);
+  pointer-events: auto;
+  z-index: 22;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.player-vitals.hit-flash {
+  border-color: rgba(242, 108, 96, 0.85);
+  box-shadow: 0 8px 24px rgba(180, 38, 32, 0.45), 0 0 12px rgba(242, 108, 96, 0.38);
+}
+
+/* Top-Left Twelve Shichen (十二时辰) Time Display */
+.shichen-bar {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding-bottom: 7px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid rgba(228, 214, 168, 0.22);
+}
+
+.shichen-left {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.shichen-badge {
+  font-family: "STKaiti", "Kaiti SC", "KaiTi", "PingFang SC", serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  padding: 1px 8px;
+  border-radius: 6px;
+  color: #fff6d6;
+  background: linear-gradient(135deg, rgba(58, 128, 122, 0.72), rgba(30, 74, 88, 0.85));
+  border: 1px solid rgba(238, 216, 158, 0.55);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.65);
+}
+
+.shichen-phase {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11.5px;
+  letter-spacing: 0.06em;
+  color: rgba(232, 244, 238, 0.90);
+}
+
+.shichen-track {
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(6, 14, 20, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.shichen-fill {
+  height: 100%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #62c4d8 0%, #f0c868 55%, #e88b48 100%);
+  transition: width 0.2s linear;
+}
+
+.vital-row {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.vital-label {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  width: 30px;
+  flex-shrink: 0;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+
+.vital-hp-label {
+  color: #ffc8c2;
+}
+
+.vital-mp-label {
+  color: #b8e8ff;
+}
+
+.vital-st-label {
+  color: #ffe29e;
+}
+
+.vital-cult-label {
+  color: #b4f8e4;
+}
+
+.realm-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 2px 0 3px;
+}
+
+.realm-status-left {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.realm-tag-label {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #d8efe6;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.55);
+}
+
+.player-realm-badge {
+  font-family: "STKaiti", "Kaiti SC", "KaiTi", "PingFang SC", serif;
+  font-size: 13.5px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  padding: 1px 9px;
+  border-radius: 999px;
+  color: #fff6d0;
+  background: linear-gradient(135deg, rgba(46, 118, 98, 0.78), rgba(26, 68, 86, 0.88));
+  border: 1px solid rgba(242, 214, 138, 0.65);
+  box-shadow: 0 1px 6px rgba(0, 0, 0, 0.40);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.75);
+}
+
+.player-realm-badge.is-zhuji {
+  color: #fff2b8;
+  background: linear-gradient(135deg, rgba(168, 112, 34, 0.85), rgba(88, 52, 18, 0.90));
+  border-color: rgba(255, 224, 132, 0.85);
+}
+
+.hud-cultivate-btn {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  color: #e6fff6;
+  background: rgba(34, 92, 86, 0.68);
+  border: 1px solid rgba(152, 238, 210, 0.50);
+  transition: all 0.15s ease;
+}
+
+.hud-cultivate-btn:hover {
+  background: rgba(52, 134, 122, 0.86);
+  border-color: rgba(240, 218, 148, 0.82);
+  color: #fff8dc;
+}
+
+.vital-cult-fill {
+  background: linear-gradient(90deg, #1f8a78 0%, #3ac4a8 55%, #8cf2d4 100%);
+  box-shadow: inset 0 1px 0 rgba(220, 255, 245, 0.45);
+}
+
+.vital-track {
+  position: relative;
+  flex: 1;
+  height: 16px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(6, 14, 20, 0.72);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.55);
+}
+
+.vital-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: 999px;
+  transition: width 0.16s ease-out;
+}
+
+.vital-hp-fill {
+  background: linear-gradient(90deg, #b8332c 0%, #e04c42 58%, #f06d5a 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 224, 218, 0.42);
+}
+
+.vital-mp-fill {
+  background: linear-gradient(90deg, #1f6fa8 0%, #2d95d8 58%, #58bdf2 100%);
+  box-shadow: inset 0 1px 0 rgba(216, 245, 255, 0.45);
+}
+
+.vital-st-fill {
+  background: linear-gradient(90deg, #a86c18 0%, #d89828 58%, #f5c44c 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 242, 198, 0.48);
+}
+
+.hud-quick-row {
+  display: flex;
+  gap: 7px;
+  margin-top: 2px;
+}
+
+.hud-quick-btn {
+  cursor: pointer;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 4px 8px;
+  border-radius: 7px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11.5px;
+  letter-spacing: 0.08em;
+  color: #eef6f2;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(232, 214, 162, 0.28);
+  transition: background 0.16s ease, border-color 0.16s ease, transform 0.14s ease;
+}
+
+.hud-quick-btn:hover {
+  background: rgba(52, 138, 128, 0.42);
+  border-color: rgba(236, 218, 164, 0.68);
+  transform: translateY(-1px);
+}
+
+.hud-quick-btn kbd {
+  font-family: inherit;
+  font-size: 10px;
+  padding: 0 4px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(232, 218, 172, 0.36);
+  color: #faecc6;
+}
+
+/* Inventory (背包 UI) & Cultivation Techniques (功法 UI) Modals */
+.cultivation-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 16, 22, 0.60);
+  backdrop-filter: blur(7px);
+  z-index: 42;
+  transition: opacity 0.22s ease;
+}
+
+.cultivation-panel {
+  width: min(94vw, 840px);
+  max-height: 90vh;
+  padding: 20px 24px 20px;
+  border-radius: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background: linear-gradient(180deg, rgba(16, 32, 42, 0.94) 0%, rgba(10, 21, 28, 0.97) 100%);
+  border: 1px solid rgba(228, 212, 164, 0.38);
+  box-shadow: 0 28px 72px rgba(2, 8, 14, 0.68), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.cultivation-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid rgba(228, 214, 168, 0.22);
+}
+
+.cultivation-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.cult-tab {
+  cursor: pointer;
+  padding: 7px 16px;
+  border-radius: 8px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: rgba(216, 234, 228, 0.78);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(216, 234, 228, 0.16);
+  transition: all 0.16s ease;
+}
+
+.cult-tab:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.cult-tab.active {
+  background: linear-gradient(135deg, rgba(48, 132, 122, 0.85) 0%, rgba(28, 86, 98, 0.92) 100%);
+  border-color: rgba(238, 218, 162, 0.76);
+  color: #fffdf5;
+  box-shadow: 0 4px 14px rgba(14, 48, 54, 0.42);
+}
+
+.bag-body {
+  display: grid;
+  grid-template-columns: 268px 1fr;
+  gap: 18px;
+  min-height: 390px;
+}
+
+.bag-equip-col,
+.bag-grid-col,
+.skill-col {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 13px 15px;
+  border-radius: 12px;
+  background: rgba(6, 15, 21, 0.48);
+  border: 1px solid rgba(214, 236, 230, 0.12);
+}
+
+.bag-section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+}
+
+.bag-section-title {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.10em;
+  color: #f6e7bd;
+}
+
+.bag-section-sub {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11.5px;
+  color: rgba(196, 222, 216, 0.72);
+}
+
+.bag-equip-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.equip-slot {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: rgba(16, 32, 42, 0.68);
+  border: 1px solid rgba(226, 212, 166, 0.24);
+  transition: all 0.16s ease;
+}
+
+.equip-slot:hover,
+.equip-slot.selected {
+  background: rgba(34, 72, 78, 0.56);
+  border-color: rgba(242, 220, 158, 0.80);
+  box-shadow: 0 0 12px rgba(64, 158, 146, 0.25);
+}
+
+.equip-slot-tag {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.10em;
+  color: #e8d29c;
+}
+
+.equip-slot-box {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.equip-item-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 600;
+  color: #faecc8;
+  background: linear-gradient(135deg, rgba(46, 112, 108, 0.65), rgba(22, 54, 66, 0.85));
+  border: 1px solid rgba(236, 216, 162, 0.46);
+  flex-shrink: 0;
+}
+
+.equip-item-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  overflow: hidden;
+}
+
+.equip-item-name {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #f4faf8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.equip-item-desc {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  color: rgba(190, 224, 214, 0.78);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bag-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 8px;
+  flex: 1;
+  max-height: 368px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.bag-cell {
+  cursor: pointer;
+  position: relative;
+  min-height: 70px;
+  padding: 18px 5px 6px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: rgba(12, 25, 34, 0.72);
+  border: 1px solid rgba(210, 232, 226, 0.16);
+  transition: all 0.15s ease;
+}
+
+.bag-cell:hover {
+  background: rgba(28, 56, 66, 0.72);
+  border-color: rgba(236, 218, 166, 0.55);
+}
+
+.bag-cell.selected {
+  background: rgba(42, 96, 98, 0.58);
+  border-color: rgba(246, 224, 156, 0.92);
+  box-shadow: 0 0 12px rgba(72, 178, 164, 0.34);
+}
+
+.bag-cell.empty {
+  cursor: default;
+  opacity: 0.55;
+}
+
+.bag-cell-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #fff6dc;
+  background: rgba(44, 106, 104, 0.55);
+  border: 1px solid rgba(232, 214, 162, 0.42);
+}
+
+.bag-cell-name {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  color: #eaf4f0;
+  text-align: center;
+  line-height: 1.15;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.bag-cell-count {
+  position: absolute;
+  top: 3px;
+  right: 5px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 10px;
+  color: #f8e4a8;
+}
+
+.bag-detail-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 13px;
+  border-radius: 9px;
+  background: rgba(14, 30, 38, 0.78);
+  border: 1px solid rgba(228, 214, 166, 0.24);
+}
+
+.bag-detail-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.bag-detail-name {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  color: #faecc6;
+}
+
+.bag-detail-desc {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11.5px;
+  color: rgba(206, 228, 222, 0.82);
+}
+
+.cult-action-btn {
+  cursor: pointer;
+  padding: 7px 16px;
+  border-radius: 7px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #ffffff;
+  background: linear-gradient(135deg, rgba(52, 142, 130, 0.88) 0%, rgba(32, 92, 106, 0.94) 100%);
+  border: 1px solid rgba(238, 220, 166, 0.72);
+  white-space: nowrap;
+  transition: transform 0.14s ease, filter 0.14s ease;
+}
+
+.cult-action-btn:hover {
+  transform: translateY(-1px);
+  filter: brightness(1.1);
+}
+
+/* Cultivation Techniques (功法 UI — 心法 & 武技) */
+.skill-filter-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.skill-filter-btn {
+  cursor: pointer;
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: rgba(214, 234, 228, 0.78);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(226, 212, 166, 0.24);
+}
+
+.skill-filter-btn.active {
+  background: rgba(54, 136, 126, 0.75);
+  border-color: rgba(240, 220, 162, 0.78);
+  color: #fffdf6;
+}
+
+.skill-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  min-height: 380px;
+}
+
+.skill-body.single-col {
+  grid-template-columns: 1fr;
+}
+
+.technique-list {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  max-height: 360px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.tech-slot-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  flex: 1;
+}
+
+.tech-empty-slot {
+  min-height: 74px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  background: rgba(12, 25, 34, 0.58);
+  border: 1px dashed rgba(210, 232, 226, 0.20);
+  color: rgba(196, 222, 216, 0.52);
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+}
+
+.tech-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  background: rgba(16, 32, 42, 0.70);
+  border: 1px solid rgba(218, 234, 228, 0.16);
+  transition: all 0.16s ease;
+}
+
+.tech-card.active {
+  background: rgba(34, 78, 82, 0.56);
+  border-color: rgba(242, 220, 158, 0.80);
+  box-shadow: 0 0 12px rgba(58, 156, 142, 0.25);
+}
+
+.tech-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tech-card-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tech-card-name {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #f6faf8;
+}
+
+.tech-card-tier {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 10.5px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: rgba(236, 212, 148, 0.16);
+  border: 1px solid rgba(236, 212, 148, 0.42);
+  color: #f8e2a6;
+}
+
+.tech-card-desc {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11.5px;
+  color: rgba(196, 224, 216, 0.82);
+}
+
+.vital-text {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  color: #ffffff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+/* Top-Right Live Circular Minimap */
+.minimap-box {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  width: 176px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  pointer-events: auto;
+  cursor: pointer;
+  z-index: 20;
+  transition: opacity 0.35s ease, transform 0.25s ease;
+}
+
+.minimap-box:hover {
+  transform: scale(1.03);
+}
+
+#minimap-canvas {
+  width: 176px;
+  height: 176px;
+  border-radius: 50%;
+  box-shadow: 0 10px 28px rgba(6, 18, 24, 0.42), 0 0 0 1px rgba(232, 214, 162, 0.24);
+  background: rgba(16, 32, 40, 0.55);
+}
+
+.minimap-north {
+  position: absolute;
+  top: -7px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 11px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: rgba(16, 32, 38, 0.85);
+  border: 1px solid rgba(232, 214, 162, 0.52);
+  color: #f6e4b4;
+  pointer-events: none;
+  z-index: 2;
+}
+
+.minimap-caption {
+  margin-top: 7px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(12, 26, 34, 0.46);
+  border: 1px solid rgba(220, 240, 234, 0.18);
+  color: rgba(236, 246, 242, 0.86);
+  backdrop-filter: blur(6px);
+}
+
+.minimap-caption kbd {
+  font-family: inherit;
+  font-size: 10px;
+  padding: 0 4px;
+  margin-right: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(232, 218, 172, 0.34);
+  color: #faecc6;
+}
+
+/* Enlarged Full World Map Modal (M Key) */
+.worldmap-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 18, 24, 0.56);
+  backdrop-filter: blur(6px);
+  z-index: 40;
+  transition: opacity 0.25s ease;
+}
+
+.worldmap-panel {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 18px 22px 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, rgba(16, 32, 40, 0.88) 0%, rgba(12, 24, 32, 0.94) 100%);
+  border: 1px solid rgba(232, 214, 162, 0.36);
+  box-shadow: 0 28px 72px rgba(4, 12, 18, 0.58), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  max-width: min(92vw, 680px);
+  max-height: 92vh;
+}
+
+.worldmap-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.worldmap-title {
+  font-size: 22px;
+  letter-spacing: 0.28em;
+  color: #f8f6eb;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+}
+
+.worldmap-close {
+  cursor: pointer;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 214, 162, 0.38);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4ecd2;
+  transition: background 0.2s ease;
+}
+
+.worldmap-close:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.worldmap-canvas-wrap {
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(226, 214, 168, 0.32);
+  box-shadow: inset 0 0 24px rgba(6, 18, 24, 0.4);
+}
+
+#worldmap-canvas {
+  display: block;
+  width: min(76vh, 84vw, 620px);
+  height: min(76vh, 84vw, 620px);
+}
+
+.worldmap-info {
+  margin-top: 10px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12.5px;
+  letter-spacing: 0.12em;
+  color: rgba(232, 244, 238, 0.85);
+}
+
+/* ESC Pause & Settings Menu Modal */
+.esc-menu-modal {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(8, 16, 22, 0.62);
+  backdrop-filter: blur(8px);
+  z-index: 45;
+  transition: opacity 0.22s ease;
+}
+
+.esc-menu-card {
+  width: min(92vw, 520px);
+  padding: 28px 32px 26px;
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(18, 34, 44, 0.94) 0%, rgba(12, 23, 30, 0.97) 100%);
+  border: 1px solid rgba(224, 212, 168, 0.32);
+  box-shadow: 0 28px 72px rgba(2, 8, 14, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.esc-menu-header {
+  text-align: center;
+}
+
+.esc-settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.esc-menu-title {
+  font-size: 28px;
+  font-weight: 400;
+  letter-spacing: 0.24em;
+  color: #f8faf8;
+  text-shadow: 0 2px 14px rgba(0, 0, 0, 0.45);
+}
+
+.esc-menu-sub {
+  margin-top: 6px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: rgba(210, 228, 224, 0.72);
+}
+
+.esc-menu-sub kbd {
+  font-family: inherit;
+  font-size: 11px;
+  padding: 1px 6px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(232, 218, 172, 0.34);
+  color: #faecc6;
+}
+
+.esc-menu-divider {
+  width: 100%;
+  height: 1px;
+  margin: 18px 0 22px;
+  background: linear-gradient(90deg, transparent, rgba(228, 214, 168, 0.45), transparent);
+}
+
+.esc-btn-list {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+
+.menu-btn {
+  cursor: pointer;
+  width: 100%;
+  padding: 13px 20px;
+  border-radius: 10px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  letter-spacing: 0.22em;
+  text-indent: 0.22em;
+  color: #eef6f3;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(214, 236, 230, 0.22);
+  transition: transform 0.16s ease, background 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+}
+
+.menu-btn:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.14);
+  border-color: rgba(232, 218, 172, 0.52);
+}
+
+.menu-btn-primary {
+  background: linear-gradient(135deg, rgba(46, 124, 116, 0.72) 0%, rgba(30, 82, 92, 0.84) 100%);
+  border-color: rgba(164, 238, 224, 0.55);
+  color: #ffffff;
+  box-shadow: 0 6px 20px rgba(10, 32, 38, 0.38);
+}
+
+.menu-btn-primary:hover {
+  background: linear-gradient(135deg, rgba(58, 148, 138, 0.85) 0%, rgba(38, 102, 114, 0.94) 100%);
+  border-color: rgba(236, 222, 172, 0.75);
+}
+
+.menu-btn-danger {
+  color: #ffd8d2;
+  border-color: rgba(238, 132, 118, 0.32);
+  background: rgba(140, 42, 36, 0.24);
+}
+
+.menu-btn-danger:hover {
+  background: rgba(176, 52, 44, 0.42);
+  border-color: rgba(248, 156, 142, 0.62);
+}
+
+.settings-back-btn {
+  cursor: pointer;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(232, 214, 162, 0.38);
+  background: rgba(255, 255, 255, 0.08);
+  color: #f4ecd2;
+  transition: background 0.18s ease;
+}
+
+.settings-back-btn:hover {
+  background: rgba(255, 255, 255, 0.18);
+}
+
+.settings-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.setting-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: rgba(8, 18, 24, 0.42);
+  border: 1px solid rgba(210, 234, 228, 0.12);
+}
+
+.setting-label-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.setting-label {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: #f2f8f6;
+}
+
+.setting-desc {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11.5px;
+  color: rgba(196, 222, 216, 0.72);
+  text-align: right;
+}
+
+.setting-options {
+  display: flex;
+  gap: 7px;
+}
+
+.opt-btn {
+  cursor: pointer;
+  flex: 1;
+  padding: 7px 10px;
+  border-radius: 7px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12.5px;
+  letter-spacing: 0.08em;
+  color: rgba(220, 236, 232, 0.80);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(214, 236, 230, 0.16);
+  transition: background 0.16s ease, border-color 0.16s ease, color 0.16s ease;
+}
+
+.opt-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.opt-btn.active {
+  background: linear-gradient(135deg, rgba(52, 138, 128, 0.82) 0%, rgba(34, 92, 104, 0.90) 100%);
+  border-color: rgba(236, 218, 164, 0.72);
+  color: #fffdf5;
+  box-shadow: 0 2px 10px rgba(20, 64, 68, 0.38);
+}
+
+/* Error Overlay */
+.error-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #101c24;
+  z-index: 50;
+}
+
+.error-box {
+  max-width: 440px;
+  padding: 32px;
+  border-radius: 12px;
+  background: rgba(22, 38, 48, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  text-align: center;
+}
+
+.error-box h2 {
+  font-size: 22px;
+  font-weight: 400;
+  margin-bottom: 12px;
+}
+
+.error-box p {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  line-height: 1.7;
+  color: rgba(225, 238, 236, 0.8);
+}
+
+/* =====================================================
+   FIVE-ELEMENT QI-REFINING SKILL HOTBAR (底部五行技能栏)
+   ===================================================== */
+.skill-hotbar {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 22;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 9px 12px 10px;
+  border-radius: 14px;
+  background: rgba(11, 23, 32, 0.72);
+  border: 1px solid rgba(210, 232, 224, 0.24);
+  backdrop-filter: blur(10px);
+  box-shadow: 0 8px 26px rgba(0, 0, 0, 0.36);
+  pointer-events: auto;
+  user-select: none;
+}
+
+.skill-buff-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 0;
+}
+
+.skill-buff-bar:empty {
+  display: none;
+}
+
+.skill-buff-pill {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: #f4faf7;
+  background: rgba(16, 36, 46, 0.86);
+  border: 1px solid rgba(228, 212, 152, 0.52);
+  letter-spacing: 0.04em;
+}
+
+.skill-cast-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 240px;
+}
+
+.skill-cast-wrap.hidden,
+.skill-cd-mask.hidden {
+  display: none;
+}
+
+.skill-cast-label {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  color: #f4e2a8;
+  min-width: 46px;
+  text-align: right;
+}
+
+.skill-cast-track {
+  flex: 1;
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+
+.skill-cast-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #e8c768, #fff1b8);
+}
+
+.skill-elem-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.elem-pill {
+  cursor: pointer;
+  min-width: 34px;
+  height: 24px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: rgba(218, 234, 228, 0.78);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(210, 232, 224, 0.18);
+  transition: all 0.14s ease;
+}
+
+.elem-pill:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #ffffff;
+}
+
+.elem-pill.active[data-elem="metal"] {
+  background: rgba(214, 174, 62, 0.34);
+  border-color: #f2d06b;
+  color: #fff3c4;
+}
+
+.elem-pill.active[data-elem="wood"] {
+  background: rgba(58, 168, 92, 0.34);
+  border-color: #6ee08e;
+  color: #dfffe8;
+}
+
+.elem-pill.active[data-elem="water"] {
+  background: rgba(46, 146, 206, 0.36);
+  border-color: #64c8f6;
+  color: #e0f6ff;
+}
+
+.elem-pill.active[data-elem="fire"] {
+  background: rgba(224, 86, 36, 0.38);
+  border-color: #ff8a4c;
+  color: #ffe8d9;
+}
+
+.elem-pill.active[data-elem="earth"] {
+  background: rgba(176, 132, 62, 0.38);
+  border-color: #d9b066;
+  color: #fff0d0;
+}
+
+.elem-switch-hint {
+  margin-left: 4px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  color: rgba(196, 220, 214, 0.68);
+}
+
+.elem-switch-hint kbd {
+  display: inline-block;
+  padding: 1px 5px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.10);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 10.5px;
+  color: #edf6f3;
+}
+
+.elem-realm-sep {
+  width: 1px;
+  height: 16px;
+  margin: 0 3px;
+  background: rgba(214, 236, 228, 0.24);
+}
+
+.realm-pill {
+  cursor: pointer;
+  height: 24px;
+  padding: 0 9px;
+  border-radius: 999px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: rgba(212, 232, 226, 0.72);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(210, 232, 224, 0.18);
+  transition: all 0.14s ease;
+}
+
+.realm-pill:hover {
+  background: rgba(255, 255, 255, 0.13);
+  color: #ffffff;
+}
+
+.realm-pill.active[data-realm="lianqi"] {
+  background: rgba(62, 148, 128, 0.34);
+  border-color: #82e6cc;
+  color: #e6fff8;
+}
+
+.realm-pill.active[data-realm="zhuji"] {
+  background: linear-gradient(135deg, rgba(212, 162, 54, 0.42), rgba(168, 108, 36, 0.46));
+  border-color: #f6d87a;
+  color: #fff5cc;
+  box-shadow: 0 0 10px rgba(246, 212, 112, 0.26);
+}
+
+.skill-slot-btn.zhuji-slot {
+  border-color: rgba(244, 210, 118, 0.48);
+  background: rgba(28, 36, 48, 0.84);
+}
+
+.skill-slot-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.skill-slot-btn {
+  position: relative;
+  cursor: pointer;
+  min-width: 108px;
+  padding: 7px 10px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  background: rgba(18, 36, 48, 0.78);
+  border: 1px solid rgba(214, 236, 228, 0.22);
+  color: #eef7f4;
+  overflow: hidden;
+  transition: transform 0.12s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.skill-slot-btn:hover {
+  background: rgba(28, 54, 68, 0.88);
+  border-color: rgba(242, 222, 160, 0.62);
+}
+
+.skill-slot-btn:active {
+  transform: scale(0.97);
+}
+
+.skill-slot-btn.no-mp {
+  opacity: 0.62;
+}
+
+.skill-slot-key {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 10px;
+  font-weight: 600;
+  color: rgba(202, 228, 222, 0.72);
+  letter-spacing: 0.04em;
+}
+
+.skill-slot-name {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #ffffff;
+  letter-spacing: 0.04em;
+}
+
+.skill-slot-meta {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 10.5px;
+  color: rgba(186, 218, 212, 0.78);
+}
+
+.skill-cd-mask {
+  position: absolute;
+  inset: 0;
+  background: rgba(6, 12, 18, 0.70);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.skill-cd-text {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #ffe8a3;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.9);
+}
+
+/* Wuji Five-Element Groups inside 功法 UI (#skill-modal) */
+.wuji-elem-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow-y: auto;
+  max-height: 410px;
+  padding-right: 4px;
+}
+
+.wuji-elem-group {
+  padding: 9px 11px;
+  border-radius: 10px;
+  background: rgba(14, 28, 38, 0.68);
+  border: 1px solid rgba(214, 234, 226, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.wuji-elem-group.active-elem {
+  border-color: rgba(242, 220, 158, 0.72);
+  background: rgba(24, 52, 62, 0.72);
+}
+
+.wuji-elem-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.wuji-elem-title {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+}
+
+.wuji-skill-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 6px 8px;
+  border-radius: 7px;
+  background: rgba(8, 18, 26, 0.54);
+  border: 1px solid rgba(210, 232, 226, 0.08);
+}
+
+.wuji-skill-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.wuji-skill-name {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: #f4faf8;
+}
+
+.wuji-skill-stats {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 10.5px;
+  color: #f2dda0;
+}
+
+.wuji-skill-desc {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  color: rgba(192, 220, 214, 0.80);
+}
+
+/* Treasure Hotbar Slots & Bag Equip Controls */
+.skill-slot-divider {
+  width: 1px;
+  margin: 4px 2px;
+  background: rgba(214, 236, 228, 0.22);
+}
+
+.treasure-slot-btn {
+  min-width: 102px;
+  background: rgba(22, 34, 48, 0.78);
+  border-color: rgba(224, 206, 148, 0.34);
+}
+
+.treasure-slot-btn.empty-treasure {
+  opacity: 0.58;
+  border-style: dashed;
+  border-color: rgba(200, 222, 218, 0.22);
+}
+
+.treasure-slot-btn.active-treasure {
+  border-color: #f6df92;
+  box-shadow: 0 0 12px rgba(242, 208, 108, 0.32);
+}
+
+.bag-action-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.bag-cell-tag {
+  position: absolute;
+  top: 3px;
+  left: 4px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 9.5px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  line-height: 1.2;
+}
+
+.bag-cell-tag.atk {
+  background: rgba(218, 92, 52, 0.26);
+  color: #ffb894;
+  border: 1px solid rgba(242, 134, 88, 0.44);
+}
+
+.bag-cell-tag.def {
+  background: rgba(68, 166, 198, 0.26);
+  color: #a4ecff;
+  border: 1px solid rgba(110, 206, 236, 0.44);
+}
+
+.bag-cell-tag.outfit {
+  background: rgba(88, 176, 128, 0.26);
+  color: #b8f6cc;
+  border: 1px solid rgba(128, 218, 166, 0.44);
+}
+
+.bag-cell-tag.herb {
+  background: rgba(56, 184, 152, 0.28);
+  color: #aefce2;
+  border: 1px solid rgba(114, 238, 198, 0.50);
+}
+
+.bag-cell-tag.ore {
+  background: rgba(184, 146, 74, 0.28);
+  color: #f6dca2;
+  border: 1px solid rgba(226, 190, 114, 0.48);
+}
+
+.bag-cell-tag.stone {
+  background: rgba(116, 178, 246, 0.30);
+  color: #d6eeff;
+  border: 1px solid rgba(154, 212, 255, 0.56);
+}
+
+.bag-cell-tag.monster_loot {
+  background: rgba(176, 98, 224, 0.28);
+  color: #ebd0ff;
+  border: 1px solid rgba(208, 144, 248, 0.52);
+}
+
+.bag-cell-tag.sword {
+  background: rgba(64, 186, 232, 0.30);
+  color: #c8f6ff;
+  border: 1px solid rgba(118, 224, 255, 0.58);
+}
+
+.herb-collect-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: 146px;
+  transform: translateX(-50%);
+  z-index: 24;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  background: rgba(14, 38, 34, 0.86);
+  border: 1px solid rgba(132, 246, 196, 0.72);
+  color: #e6fff4;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.42);
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  transition: transform 0.14s ease, background 0.14s ease;
+}
+
+.herb-collect-prompt.hidden {
+  display: none;
+}
+
+.herb-collect-prompt:hover {
+  background: rgba(22, 58, 50, 0.94);
+  transform: translateX(-50%) scale(1.03);
+}
+
+.herb-collect-prompt kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(132, 246, 196, 0.22);
+  border: 1px solid rgba(154, 252, 208, 0.58);
+  font-size: 11.5px;
+  color: #ffffff;
+}
+
+.door-interact-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: 186px;
+  transform: translateX(-50%);
+  z-index: 25;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 17px;
+  border-radius: 999px;
+  background: rgba(34, 24, 14, 0.88);
+  border: 1px solid rgba(246, 208, 122, 0.78);
+  color: #fff3d2;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.46);
+  backdrop-filter: blur(8px);
+  pointer-events: auto;
+  transition: transform 0.14s ease, background 0.14s ease;
+}
+
+.door-interact-prompt.hidden {
+  display: none;
+}
+
+.door-interact-prompt:hover {
+  background: rgba(52, 36, 18, 0.96);
+  transform: translateX(-50%) scale(1.03);
+}
+
+.door-interact-prompt kbd {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(246, 208, 122, 0.24);
+  border: 1px solid rgba(252, 224, 152, 0.62);
+  font-size: 11.5px;
+  color: #ffffff;
+}
+
+/* Protagonist Mini Stat Row (移速 / 攻击 / 心法) */
+.vital-stats-mini-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  background: rgba(8, 22, 30, 0.56);
+  border: 1px solid rgba(226, 212, 166, 0.18);
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  color: rgba(212, 236, 228, 0.86);
+}
+
+.vital-mini-stat strong {
+  color: #faecc2;
+  font-weight: 700;
+  margin-left: 2px;
+}
+
+/* Center Crosshair Overlay for Attack Mode (360° 全向攻击准星) */
+.combat-crosshair {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  width: 44px;
+  height: 44px;
+  pointer-events: none;
+  z-index: 30;
+}
+
+.combat-crosshair.hidden {
+  display: none;
+}
+
+.crosshair-ring {
+  position: absolute;
+  inset: 7px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(154, 248, 226, 0.62);
+  box-shadow: 0 0 10px rgba(96, 232, 206, 0.35), inset 0 0 6px rgba(96, 232, 206, 0.2);
+}
+
+.crosshair-dot {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  background: #fff9dc;
+  box-shadow: 0 0 8px rgba(255, 234, 152, 0.95);
+}
+
+.crosshair-tick {
+  position: absolute;
+  background: rgba(238, 252, 246, 0.88);
+  box-shadow: 0 0 4px rgba(18, 42, 48, 0.85);
+}
+
+.crosshair-tick.tick-top {
+  left: 50%;
+  top: 0;
+  width: 2px;
+  height: 9px;
+  transform: translateX(-50%);
+}
+
+.crosshair-tick.tick-bottom {
+  left: 50%;
+  bottom: 0;
+  width: 2px;
+  height: 9px;
+  transform: translateX(-50%);
+}
+
+.crosshair-tick.tick-left {
+  top: 50%;
+  left: 0;
+  width: 9px;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.crosshair-tick.tick-right {
+  top: 50%;
+  right: 0;
+  width: 9px;
+  height: 2px;
+  transform: translateY(-50%);
+}
+
+.crosshair-mode-tag {
+  position: absolute;
+  top: 52px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: rgba(10, 26, 34, 0.66);
+  border: 1px solid rgba(154, 248, 226, 0.36);
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 10.5px;
+  letter-spacing: 0.06em;
+  color: #dffcf4;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85);
+}
+
+/* Skill Range & Direction Aiming Banner */
+.skill-aim-banner {
+  position: fixed;
+  left: 50%;
+  bottom: 148px;
+  transform: translateX(-50%);
+  z-index: 28;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 18px;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(16, 42, 52, 0.92), rgba(10, 26, 36, 0.95));
+  border: 1px solid rgba(246, 220, 148, 0.82);
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.52), 0 0 14px rgba(92, 224, 202, 0.28);
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12.5px;
+  color: #f4fcf8;
+  pointer-events: none;
+}
+
+.skill-aim-banner.hidden {
+  display: none;
+}
+
+#skill-aim-title {
+  font-weight: 700;
+  color: #ffe99e;
+}
+
+.skill-aim-hint {
+  color: rgba(212, 238, 232, 0.9);
+  font-size: 11.5px;
+}
+
+.skill-aim-hint strong {
+  color: #98fce4;
+}
+
+.skill-slot-btn.aiming-slot {
+  border-color: #ffe88e !important;
+  box-shadow: 0 0 16px rgba(255, 226, 128, 0.56) !important;
+  transform: translateY(-2px);
+}
+
+.skill-slot-btn.attack-mode-active {
+  border-color: #8efad8 !important;
+  box-shadow: 0 0 14px rgba(114, 246, 210, 0.45);
+}
+
+/* Equipped Xinfa (2 slots) & Wuji (1 Basic + 2 Skills) Loadout Layout */
+.xinfa-col-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 430px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.equipped-slots-bar {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  padding: 9px 10px;
+  border-radius: 10px;
+  background: rgba(12, 28, 38, 0.78);
+  border: 1px solid rgba(238, 216, 158, 0.34);
+}
+
+.equipped-slots-bar.wuji-three-slots {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.loadout-slot-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 5px;
+  padding: 8px 9px;
+  border-radius: 8px;
+  background: rgba(18, 40, 52, 0.72);
+  border: 1px solid rgba(216, 236, 228, 0.20);
+  min-height: 68px;
+}
+
+.loadout-slot-card.filled {
+  background: linear-gradient(135deg, rgba(32, 74, 82, 0.78), rgba(18, 44, 56, 0.88));
+  border-color: rgba(244, 220, 156, 0.72);
+}
+
+.loadout-slot-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px;
+}
+
+.loadout-slot-tag {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #ecd69c;
+  letter-spacing: 0.05em;
+}
+
+.loadout-slot-name {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #f6fcf9;
+}
+
+.loadout-slot-sub {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 10.5px;
+  color: rgba(198, 228, 220, 0.82);
+}
+
+.mini-slot-btn {
+  cursor: pointer;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 10.5px;
+  font-weight: 600;
+  color: #fff8e2;
+  background: rgba(48, 128, 120, 0.78);
+  border: 1px solid rgba(236, 216, 162, 0.62);
+  transition: all 0.14s ease;
+}
+
+.mini-slot-btn:hover {
+  background: rgba(64, 158, 148, 0.92);
+  border-color: #ffeaa4;
+}
+
+.mini-slot-btn.unequip-btn {
+  background: rgba(142, 64, 56, 0.72);
+  border-color: rgba(242, 164, 146, 0.56);
+}
+
+.mini-slot-btn.active-equipped {
+  background: rgba(214, 162, 54, 0.82);
+  border-color: #fff0a8;
+  color: #102028;
+}
+
+.wuji-skill-actions {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 3px;
+}
+
+/* =========================================================
+   MONSTER BESTIARY UI (ESC 菜单 · 妖兽图鉴)
+   ========================================================= */
+.esc-menu-card.bestiary-wide {
+  width: min(94vw, 980px);
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+
+#esc-bestiary-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  max-height: 80vh;
+}
+
+#esc-bestiary-view.view-hidden {
+  display: none;
+}
+
+.bestiary-filter-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin-bottom: 12px;
+}
+
+.bestiary-filter-btn {
+  cursor: pointer;
+  padding: 5px 13px;
+  border-radius: 999px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  color: rgba(214, 236, 230, 0.84);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(226, 212, 166, 0.24);
+  transition: all 0.15s ease;
+}
+
+.bestiary-filter-btn:hover {
+  background: rgba(54, 136, 126, 0.35);
+  color: #ffffff;
+}
+
+.bestiary-filter-btn.active {
+  background: linear-gradient(135deg, rgba(48, 134, 124, 0.88), rgba(28, 86, 98, 0.94));
+  border-color: rgba(242, 222, 162, 0.82);
+  color: #fffdf5;
+  font-weight: 600;
+}
+
+.bestiary-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-y: auto;
+  padding-right: 6px;
+  flex: 1;
+  min-height: 0;
+}
+
+.bestiary-card {
+  padding: 12px 14px;
+  border-radius: 11px;
+  background: rgba(8, 18, 26, 0.78);
+  border: 1px solid rgba(218, 234, 228, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.bestiary-card.cat-elite {
+  border-color: rgba(116, 234, 252, 0.42);
+  background: rgba(10, 22, 34, 0.84);
+}
+
+.bestiary-card.cat-zhuji-elite {
+  border-color: rgba(248, 212, 114, 0.48);
+  background: rgba(22, 16, 34, 0.84);
+}
+
+.bestiary-card.cat-boss {
+  border-color: rgba(255, 178, 88, 0.66);
+  background: linear-gradient(180deg, rgba(34, 14, 24, 0.88), rgba(16, 12, 22, 0.90));
+}
+
+.bestiary-card-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.bestiary-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.bestiary-name {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #f8f4e6;
+}
+
+.bestiary-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  background: rgba(68, 156, 126, 0.28);
+  border: 1px solid rgba(132, 224, 178, 0.46);
+  color: #cffae2;
+}
+
+.bestiary-badge.badge-elite {
+  background: rgba(46, 152, 186, 0.28);
+  border-color: rgba(118, 236, 255, 0.58);
+  color: #c2f8ff;
+}
+
+.bestiary-badge.badge-zhuji {
+  background: rgba(176, 134, 48, 0.28);
+  border-color: rgba(246, 210, 118, 0.58);
+  color: #ffecaa;
+}
+
+.bestiary-badge.badge-boss {
+  background: rgba(196, 62, 52, 0.36);
+  border-color: rgba(255, 182, 86, 0.78);
+  color: #ffe29a;
+}
+
+.bestiary-region-tag {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11.5px;
+  color: rgba(196, 228, 220, 0.84);
+}
+
+.bestiary-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11.5px;
+  color: rgba(206, 226, 222, 0.86);
+}
+
+.bestiary-meta-row strong {
+  color: #f6e4b4;
+  font-weight: 600;
+}
+
+.bestiary-moves-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.bestiary-move-chip {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  color: #e4f4f0;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(212, 232, 226, 0.14);
+}
+
+.bestiary-move-chip strong {
+  color: #96f2de;
+}
+
+.bestiary-table-wrap {
+  overflow-x: auto;
+}
+
+.bestiary-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11.5px;
+}
+
+.bestiary-table th,
+.bestiary-table td {
+  padding: 5px 8px;
+  text-align: center;
+  border-bottom: 1px solid rgba(210, 232, 226, 0.10);
+  white-space: nowrap;
+}
+
+.bestiary-table th {
+  color: #edd89f;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.bestiary-table td {
+  color: #e6f4f0;
+}
+
+.bestiary-table td.col-realm {
+  text-align: left;
+  font-weight: 600;
+  color: #b8f6e8;
+}
+
+.bestiary-table td.col-hp {
+  color: #ff9c8e;
+  font-weight: 600;
+}
+
+.bestiary-table td.col-dmg {
+  color: #ffe498;
+}
+
+.bestiary-table td.col-exp {
+  color: #8cf2b8;
+}
+
+/* =========================================================
+   PLACEABLE FURNACES (炼丹炉 / 炼器炉) PROMPT & CRAFTING UI
+   ========================================================= */
+.bag-cell-tag.building {
+  background: rgba(246, 174, 72, 0.25);
+  color: #ffd588;
+  border-color: rgba(246, 174, 72, 0.52);
+}
+
+.bag-cell-tag.pill {
+  background: rgba(88, 224, 186, 0.24);
+  color: #98ffe6;
+  border-color: rgba(88, 224, 186, 0.50);
+}
+
+.bag-cell-tag.fulu {
+  background: rgba(242, 118, 92, 0.24);
+  color: #ffb8a4;
+  border-color: rgba(242, 118, 92, 0.52);
+}
+
+.furnace-interact-prompt {
+  position: fixed;
+  left: 50%;
+  bottom: 186px;
+  transform: translateX(-50%);
+  z-index: 27;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(132, 240, 212, 0.72);
+  background: linear-gradient(135deg, rgba(16, 38, 42, 0.92), rgba(10, 22, 28, 0.94));
+  color: #e8fff8;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45), 0 0 14px rgba(100, 232, 200, 0.25);
+  transition: transform 0.14s ease, border-color 0.14s ease;
+}
+
+.furnace-interact-prompt.forging-mode {
+  border-color: rgba(255, 162, 82, 0.80);
+  background: linear-gradient(135deg, rgba(40, 22, 16, 0.92), rgba(22, 14, 14, 0.95));
+  color: #ffebd4;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.48), 0 0 14px rgba(255, 128, 52, 0.28);
+}
+
+.furnace-interact-prompt:hover {
+  transform: translateX(-50%) translateY(-1px);
+}
+
+.furnace-interact-prompt kbd {
+  padding: 2px 7px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.14);
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.furnace-interact-prompt.hidden {
+  display: none;
+}
+
+.panel-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 68;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(4, 10, 14, 0.70);
+  backdrop-filter: blur(8px);
+}
+
+.panel-modal.hidden {
+  display: none;
+}
+
+.panel-card {
+  border-radius: 16px;
+  border: 1px solid rgba(190, 224, 214, 0.24);
+  background: linear-gradient(155deg, rgba(12, 24, 30, 0.96), rgba(8, 16, 22, 0.98));
+  color: #edf7f4;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  overflow: hidden;
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 15px 20px;
+  border-bottom: 1px solid rgba(200, 228, 222, 0.14);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.panel-close {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(216, 236, 230, 0.24);
+  background: rgba(255, 255, 255, 0.06);
+  color: #e4f4f0;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.panel-close:hover {
+  background: rgba(235, 92, 72, 0.28);
+  border-color: rgba(255, 134, 114, 0.60);
+  color: #ffffff;
+}
+
+.craft-card {
+  width: min(760px, 92vw);
+  max-height: min(600px, 88vh);
+  display: flex;
+  flex-direction: column;
+}
+
+.craft-card.craft-alchemy {
+  border-color: rgba(98, 226, 198, 0.44);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.65), 0 0 28px rgba(72, 212, 184, 0.16);
+}
+
+.craft-card.craft-forging {
+  border-color: rgba(255, 146, 68, 0.46);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.68), 0 0 28px rgba(255, 108, 42, 0.18);
+}
+
+.craft-head-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.craft-badge {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.craft-badge.alchemy {
+  background: linear-gradient(135deg, rgba(46, 142, 124, 0.55), rgba(24, 82, 76, 0.72));
+  border: 1px solid rgba(116, 245, 214, 0.68);
+  color: #b8fff0;
+}
+
+.craft-badge.forging {
+  background: linear-gradient(135deg, rgba(164, 62, 24, 0.58), rgba(66, 28, 18, 0.78));
+  border: 1px solid rgba(255, 166, 92, 0.72);
+  color: #ffd8a8;
+}
+
+.craft-title {
+  margin: 0;
+  font-size: 17px;
+  color: #f4faf8;
+  letter-spacing: 0.08em;
+}
+
+.craft-sub {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: rgba(206, 228, 224, 0.72);
+}
+
+.craft-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.craft-pickup-btn {
+  padding: 5px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(226, 238, 234, 0.28);
+  background: rgba(255, 255, 255, 0.07);
+  color: #dceee8;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.craft-pickup-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+}
+
+.craft-body {
+  display: grid;
+  grid-template-columns: 1.05fr 1fr;
+  gap: 16px;
+  padding: 16px 20px 20px;
+  overflow: hidden;
+  min-height: 360px;
+}
+
+.craft-left {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.craft-section-title {
+  font-size: 12px;
+  color: rgba(206, 232, 224, 0.78);
+  margin-bottom: 8px;
+}
+
+.craft-recipe-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+
+.craft-recipe-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: 10px;
+  border: 1px solid rgba(200, 228, 222, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.14s ease, border-color 0.14s ease;
+}
+
+.craft-recipe-item:hover {
+  background: rgba(255, 255, 255, 0.09);
+}
+
+.craft-recipe-item.selected.alchemy {
+  border-color: rgba(108, 240, 208, 0.76);
+  background: rgba(46, 148, 128, 0.22);
+}
+
+.craft-recipe-item.selected.forging {
+  border-color: rgba(255, 162, 86, 0.80);
+  background: rgba(176, 72, 28, 0.24);
+}
+
+.craft-recipe-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.34);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #faecc2;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.craft-recipe-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.craft-recipe-name {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #f0faf6;
+}
+
+.craft-recipe-sub {
+  font-size: 11px;
+  color: rgba(202, 226, 220, 0.72);
+}
+
+.craft-right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.craft-furnace-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  border-radius: 12px;
+  border: 1px solid rgba(210, 232, 226, 0.16);
+}
+
+.craft-furnace-banner.alchemy {
+  background: radial-gradient(circle at 20% 50%, rgba(72, 214, 186, 0.22), rgba(14, 30, 34, 0.65));
+}
+
+.craft-furnace-banner.forging {
+  background: radial-gradient(circle at 20% 50%, rgba(255, 118, 42, 0.24), rgba(28, 18, 16, 0.72));
+}
+
+.craft-furnace-emblem {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.36);
+  border: 1px solid rgba(246, 220, 148, 0.45);
+  color: #ffea9c;
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.craft-selected-name {
+  font-size: 16px;
+  font-weight: 700;
+  color: #f6fcf9;
+}
+
+.craft-selected-tier {
+  font-size: 12px;
+  color: rgba(214, 236, 228, 0.76);
+  margin-top: 3px;
+}
+
+.craft-detail-box {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.26);
+  border: 1px solid rgba(206, 232, 226, 0.12);
+}
+
+.craft-detail-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 12.5px;
+  color: rgba(196, 222, 216, 0.76);
+}
+
+.craft-detail-row strong {
+  color: #f4faf8;
+  text-align: right;
+  font-weight: 600;
+}
+
+.craft-status-msg {
+  min-height: 36px;
+  padding: 8px 11px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  font-size: 12px;
+  line-height: 1.45;
+  color: #cfece4;
+}
+
+.craft-status-msg.ok {
+  color: #94ffca;
+  background: rgba(56, 178, 128, 0.18);
+}
+
+.craft-status-msg.err {
+  color: #ffaa96;
+  background: rgba(210, 74, 54, 0.18);
+}
+
+.craft-main-btn {
+  margin-top: auto;
+  padding: 11px 18px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+  transition: transform 0.12s ease, filter 0.12s ease;
+}
+
+.craft-main-btn.alchemy {
+  background: linear-gradient(135deg, #2b9a84, #1e6e64);
+  border-color: rgba(132, 250, 224, 0.65);
+  color: #ecfffb;
+}
+
+.craft-main-btn.forging {
+  background: linear-gradient(135deg, #c4521c, #8a2c12);
+  border-color: rgba(255, 180, 108, 0.68);
+  color: #fff2e4;
+}
+
+.craft-main-btn:hover:not(:disabled) {
+  filter: brightness(1.12);
+  transform: translateY(-1px);
+}
+
+.craft-main-btn:disabled,
+.craft-main-btn.disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  filter: saturate(0.5);
+}
+
+/* =========================================================
+   SPIRIT STONES, MERCHANT SHOP, LIBRARY PAVILION & CHEAT UI
+   ========================================================= */
+.vital-stone-stat strong {
+  color: #8ee6ff;
+}
+
+.bag-header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.bag-stone-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  color: #c8f2ff;
+  background: rgba(42, 118, 168, 0.28);
+  border: 1px solid rgba(118, 214, 255, 0.52);
+  white-space: nowrap;
+}
+
+.bag-stone-badge strong {
+  color: #ffffff;
+  font-weight: 700;
+}
+
+.menu-btn-cheat {
+  background: linear-gradient(135deg, rgba(168, 122, 34, 0.34), rgba(112, 72, 20, 0.44));
+  border-color: rgba(246, 208, 112, 0.54);
+  color: #fff2c4;
+}
+
+.menu-btn-cheat:hover {
+  background: linear-gradient(135deg, rgba(202, 150, 44, 0.48), rgba(138, 88, 26, 0.58));
+  border-color: rgba(255, 224, 138, 0.78);
+}
+
+.skill-slot-btn.empty-skill {
+  opacity: 0.62;
+  border-style: dashed;
+  border-color: rgba(200, 222, 218, 0.24);
+}
+
+.wuji-skill-item.locked-item {
+  opacity: 0.68;
+  background: rgba(8, 14, 22, 0.42);
+}
+
+.skill-lock-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(204, 222, 218, 0.78);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(204, 222, 218, 0.18);
+}
+
+.skill-lock-badge.realm-warn {
+  color: #ffd88e;
+  background: rgba(188, 126, 36, 0.20);
+  border-color: rgba(244, 190, 92, 0.46);
+}
+
+.craft-recipe-item.realm-locked {
+  opacity: 0.64;
+}
+
+.craft-realm-tag {
+  margin-left: 6px;
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #ffd486;
+  background: rgba(186, 118, 28, 0.28);
+  border: 1px solid rgba(246, 188, 88, 0.52);
+}
+
+.furnace-interact-prompt.shop-mode {
+  border-color: rgba(246, 216, 126, 0.84);
+  background: linear-gradient(135deg, rgba(36, 32, 18, 0.94), rgba(18, 22, 28, 0.95));
+  color: #fff2c8;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.48), 0 0 14px rgba(246, 208, 108, 0.26);
+}
+
+.shop-card {
+  width: min(820px, 94vw);
+  max-height: min(640px, 88vh);
+  display: flex;
+  flex-direction: column;
+  border-color: rgba(238, 208, 134, 0.42);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.68), 0 0 28px rgba(232, 194, 102, 0.14);
+}
+
+.library-card {
+  border-color: rgba(114, 212, 246, 0.46);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.68), 0 0 28px rgba(96, 198, 244, 0.16);
+}
+
+.shop-badge {
+  background: linear-gradient(135deg, rgba(178, 134, 42, 0.58), rgba(92, 62, 18, 0.78));
+  border: 1px solid rgba(248, 216, 128, 0.72);
+  color: #fff0bd;
+}
+
+.library-badge {
+  background: linear-gradient(135deg, rgba(44, 126, 178, 0.58), rgba(22, 62, 98, 0.78));
+  border: 1px solid rgba(132, 220, 255, 0.72);
+  color: #d6f4ff;
+}
+
+.shop-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding: 11px 20px;
+  border-bottom: 1px solid rgba(200, 228, 222, 0.12);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.shop-tabs {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-wrap: wrap;
+}
+
+.shop-tab {
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(210, 232, 226, 0.18);
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(220, 238, 234, 0.80);
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  transition: background 0.14s ease, border-color 0.14s ease, color 0.14s ease;
+}
+
+.shop-tab:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #ffffff;
+}
+
+.shop-tab.active {
+  background: linear-gradient(135deg, rgba(58, 146, 134, 0.72), rgba(34, 92, 108, 0.82));
+  border-color: rgba(242, 220, 152, 0.72);
+  color: #fffdf5;
+}
+
+.shop-rate-note {
+  font-size: 11.5px;
+  color: rgba(200, 224, 218, 0.72);
+}
+
+.shop-item-list {
+  flex: 1;
+  min-height: 260px;
+  overflow-y: auto;
+  padding: 14px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+
+.shop-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 13px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(206, 232, 226, 0.14);
+}
+
+.shop-row.learned-row {
+  border-color: rgba(110, 228, 178, 0.34);
+  background: rgba(34, 96, 76, 0.16);
+}
+
+.shop-row-left {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  min-width: 0;
+  flex: 1;
+}
+
+.shop-row-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.36);
+  border: 1px solid rgba(244, 222, 160, 0.36);
+  color: #ffea9c;
+  font-size: 16px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.shop-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.shop-row-title {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #f4faf8;
+}
+
+.shop-row-tag {
+  font-size: 10.5px;
+  padding: 1px 6px;
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(214, 236, 230, 0.18);
+  color: #cfece4;
+  font-weight: 500;
+}
+
+.shop-row-tag.zhuji-tag {
+  color: #ffe294;
+  background: rgba(188, 134, 34, 0.24);
+  border-color: rgba(248, 206, 98, 0.48);
+}
+
+.shop-row-tag.learned-tag {
+  color: #98ffd0;
+  background: rgba(42, 146, 102, 0.28);
+  border-color: rgba(112, 240, 182, 0.52);
+}
+
+.shop-row-desc {
+  font-size: 11.5px;
+  color: rgba(196, 222, 216, 0.78);
+  line-height: 1.4;
+}
+
+.shop-row-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+
+.shop-price-tag {
+  font-size: 13px;
+  font-weight: 700;
+  color: #96e4ff;
+  white-space: nowrap;
+}
+
+.shop-action-btn {
+  cursor: pointer;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(132, 240, 212, 0.56);
+  background: linear-gradient(135deg, rgba(44, 138, 122, 0.78), rgba(26, 86, 84, 0.88));
+  color: #ecfffb;
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: filter 0.12s ease, transform 0.12s ease;
+}
+
+.shop-action-btn.sell-btn {
+  border-color: rgba(248, 206, 108, 0.58);
+  background: linear-gradient(135deg, rgba(168, 118, 36, 0.78), rgba(112, 72, 22, 0.88));
+  color: #fff6dc;
+}
+
+.shop-action-btn:hover:not(:disabled) {
+  filter: brightness(1.14);
+  transform: translateY(-1px);
+}
+
+.shop-action-btn:disabled {
+  opacity: 0.46;
+  cursor: not-allowed;
+  filter: saturate(0.45);
+}
+
+.shop-empty-hint {
+  padding: 36px 16px;
+  text-align: center;
+  font-size: 13px;
+  color: rgba(196, 222, 216, 0.68);
+}
+
+.shop-status-bar {
+  margin: 0 20px 16px;
+}
+
+/* =========================================================
+   MAIN TITLE SCREEN, CHARACTER CREATION, SAVE & WORLD LOADING
+   ========================================================= */
+.main-menu-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background:
+    radial-gradient(ellipse at 50% 24%, rgba(56, 134, 146, 0.34) 0%, rgba(12, 28, 38, 0.88) 54%, rgba(6, 13, 20, 0.98) 100%),
+    linear-gradient(160deg, #0b1924 0%, #102430 48%, #07111a 100%);
+  overflow: hidden;
+}
+
+.main-menu-overlay.hidden,
+.world-loading-overlay.hidden {
+  display: none;
+}
+
+.mm-backdrop-clouds {
+  position: absolute;
+  inset: -12%;
+  pointer-events: none;
+  background:
+    radial-gradient(circle at 18% 76%, rgba(114, 214, 206, 0.14) 0%, transparent 42%),
+    radial-gradient(circle at 82% 28%, rgba(244, 212, 132, 0.12) 0%, transparent 38%),
+    radial-gradient(circle at 52% 88%, rgba(86, 162, 178, 0.16) 0%, transparent 46%);
+  filter: blur(18px);
+}
+
+.mm-card {
+  position: relative;
+  z-index: 2;
+  width: min(560px, 94vw);
+  max-height: min(690px, 92vh);
+  overflow-y: auto;
+  padding: 32px 30px 28px;
+  border-radius: 18px;
+  background: linear-gradient(160deg, rgba(12, 26, 35, 0.94) 0%, rgba(8, 17, 25, 0.97) 100%);
+  border: 1px solid rgba(232, 210, 148, 0.38);
+  box-shadow: 0 28px 80px rgba(0, 0, 0, 0.72), 0 0 38px rgba(84, 194, 186, 0.14);
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #eff7f4;
+}
+
+.mm-view.view-hidden {
+  display: none;
+}
+
+.mm-emblem {
+  width: 62px;
+  height: 62px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: #fff2c2;
+  background: radial-gradient(circle, rgba(64, 152, 142, 0.44), rgba(14, 34, 42, 0.88));
+  border: 1.5px solid rgba(244, 218, 144, 0.68);
+  box-shadow: 0 0 24px rgba(102, 216, 198, 0.28);
+}
+
+.mm-title {
+  margin: 0;
+  text-align: center;
+  font-size: 38px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  text-indent: 0.24em;
+  color: #f9f3df;
+  text-shadow: 0 4px 20px rgba(102, 214, 198, 0.34);
+}
+
+.mm-subtitle {
+  margin: 8px 0 0;
+  text-align: center;
+  font-size: 13px;
+  letter-spacing: 0.22em;
+  color: rgba(206, 232, 224, 0.76);
+}
+
+.mm-divider {
+  height: 1px;
+  margin: 20px 0;
+  background: linear-gradient(90deg, transparent, rgba(234, 212, 148, 0.42), transparent);
+}
+
+.mm-btn-list {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.mm-btn {
+  cursor: pointer;
+  width: 100%;
+  padding: 12px 18px;
+  border-radius: 10px;
+  border: 1px solid rgba(210, 234, 228, 0.22);
+  background: rgba(255, 255, 255, 0.06);
+  color: #eef8f5;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  transition: transform 0.14s ease, background 0.16s ease, border-color 0.16s ease;
+}
+
+.mm-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.13);
+  border-color: rgba(242, 218, 152, 0.62);
+  transform: translateY(-1px);
+}
+
+.mm-btn:disabled {
+  opacity: 0.42;
+  cursor: not-allowed;
+}
+
+.mm-btn-primary {
+  background: linear-gradient(135deg, rgba(46, 146, 134, 0.88), rgba(26, 90, 102, 0.94));
+  border-color: rgba(244, 220, 152, 0.74);
+  color: #fffdf5;
+  box-shadow: 0 6px 22px rgba(24, 96, 98, 0.42);
+}
+
+.mm-btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(58, 166, 152, 0.94), rgba(32, 108, 120, 0.98));
+}
+
+.mm-btn-danger {
+  background: rgba(154, 48, 42, 0.26);
+  border-color: rgba(238, 132, 118, 0.42);
+  color: #ffdcd6;
+}
+
+.mm-btn-danger:hover:not(:disabled) {
+  background: rgba(178, 56, 48, 0.42);
+  border-color: rgba(252, 156, 142, 0.68);
+}
+
+.mm-footer-hint {
+  margin: 16px 0 0;
+  text-align: center;
+  font-size: 12px;
+  color: rgba(190, 220, 214, 0.72);
+}
+
+.mm-sub-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mm-sub-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  color: #f8f2de;
+}
+
+.mm-sub-desc {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: rgba(196, 222, 216, 0.74);
+}
+
+.cc-field-block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.cc-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #eedb9e;
+  letter-spacing: 0.08em;
+}
+
+.cc-name-input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
+  border-radius: 9px;
+  border: 1px solid rgba(226, 208, 150, 0.36);
+  background: rgba(6, 14, 20, 0.72);
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 15px;
+  outline: none;
+}
+
+.cc-name-input:focus {
+  border-color: #f6dc88;
+  box-shadow: 0 0 0 2px rgba(246, 220, 136, 0.18);
+}
+
+.cc-elem-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+
+.cc-elem-card {
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  padding: 10px 6px;
+  border-radius: 10px;
+  border: 1px solid rgba(210, 232, 226, 0.18);
+  background: rgba(255, 255, 255, 0.04);
+  color: #e6f4f0;
+  font-family: inherit;
+  transition: transform 0.12s ease, border-color 0.14s ease, background 0.14s ease;
+}
+
+.cc-elem-card:hover {
+  background: rgba(255, 255, 255, 0.10);
+  transform: translateY(-1px);
+}
+
+.cc-elem-card.active {
+  border-color: #f4d87e;
+  background: rgba(46, 118, 112, 0.32);
+  box-shadow: 0 0 14px rgba(244, 216, 126, 0.24);
+}
+
+.cc-elem-glyph {
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  font-weight: 700;
+  background: rgba(0, 0, 0, 0.36);
+  border: 1px solid rgba(255, 255, 255, 0.24);
+}
+
+.cc-elem-glyph.elem-metal { color: #ffe680; border-color: #f2d06b; }
+.cc-elem-glyph.elem-wood  { color: #7ef6a4; border-color: #6ee08e; }
+.cc-elem-glyph.elem-water { color: #7cd8ff; border-color: #64c8f6; }
+.cc-elem-glyph.elem-fire  { color: #ff9a62; border-color: #ff8a4c; }
+.cc-elem-glyph.elem-earth { color: #ebd082; border-color: #d9b066; }
+
+.cc-elem-name {
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+.cc-elem-sub {
+  font-size: 10px;
+  color: rgba(196, 222, 216, 0.76);
+  text-align: center;
+  line-height: 1.3;
+}
+
+.cc-gift-preview {
+  padding: 11px 14px;
+  border-radius: 9px;
+  background: rgba(24, 52, 58, 0.44);
+  border: 1px solid rgba(132, 232, 206, 0.28);
+  font-size: 12.5px;
+  line-height: 1.55;
+  color: #d6f5ec;
+  margin-bottom: 18px;
+}
+
+.cc-gift-preview strong {
+  color: #ffe89c;
+}
+
+.cc-actions-row {
+  display: flex;
+  justify-content: center;
+}
+
+.cc-enter-btn {
+  padding: 13px 22px;
+  font-size: 16px;
+}
+
+.mm-save-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 360px;
+  overflow-y: auto;
+}
+
+.mm-save-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 11px 14px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(206, 232, 226, 0.16);
+}
+
+.mm-save-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.mm-save-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #f4faf8;
+}
+
+.mm-save-meta {
+  font-size: 11.5px;
+  color: rgba(192, 220, 214, 0.74);
+}
+
+.mm-save-actions {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  flex-shrink: 0;
+}
+
+.world-loading-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 140;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(circle at 50% 35%, rgba(20, 48, 58, 0.96), rgba(6, 13, 20, 0.99));
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  color: #eff7f4;
+}
+
+.loading-box {
+  width: min(440px, 88vw);
+  text-align: center;
+  padding: 32px 28px;
+  border-radius: 16px;
+  background: rgba(10, 22, 30, 0.92);
+  border: 1px solid rgba(232, 210, 148, 0.36);
+  box-shadow: 0 24px 68px rgba(0, 0, 0, 0.68);
+}
+
+.loading-emblem {
+  width: 54px;
+  height: 54px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  font-weight: 700;
+  color: #fff0bd;
+  background: radial-gradient(circle, rgba(56, 152, 144, 0.45), rgba(14, 30, 38, 0.9));
+  border: 1.5px solid rgba(244, 218, 144, 0.68);
+  animation: loadingPulse 1.6s ease-in-out infinite;
+}
+
+@keyframes loadingPulse {
+  0%, 100% { transform: scale(1); box-shadow: 0 0 14px rgba(102, 220, 204, 0.28); }
+  50% { transform: scale(1.06); box-shadow: 0 0 28px rgba(244, 218, 144, 0.48); }
+}
+
+.loading-title {
+  margin: 0 0 8px;
+  font-size: 21px;
+  letter-spacing: 0.12em;
+  color: #f8f2de;
+}
+
+.loading-stage-text {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: rgba(202, 228, 222, 0.80);
+}
+
+.loading-bar-track {
+  width: 100%;
+  height: 9px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.10);
+  overflow: hidden;
+  border: 1px solid rgba(210, 234, 226, 0.18);
+}
+
+.loading-bar-fill {
+  height: 100%;
+  width: 0%;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3ac4ad, #f4d67c);
+  transition: width 0.22s ease;
+}
+
+.loading-pct {
+  display: inline-block;
+  margin-top: 9px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #f6e09c;
+}
+
+.player-name-badge {
+  font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #f6efd8;
+  letter-spacing: 0.05em;
+}
+
+.bag-cell-tag.skill_book {
+  background: rgba(108, 178, 255, 0.28);
+  color: #d2ebff;
+  border-color: rgba(146, 206, 255, 0.56);
+}
+
+.skill-cast-fill.charge-ready {
+  background: linear-gradient(90deg, #ffcf48, #fff5b8);
+  box-shadow: 0 0 10px rgba(255, 220, 108, 0.75);
+}

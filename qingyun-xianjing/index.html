@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>青云问道 · 仙境漫游</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <!-- Main Title Screen, Character Creation & Save Loader (主界面 / 人物创建 / 读取存档) -->
+  <div id="main-menu-overlay" class="main-menu-overlay" role="dialog" aria-modal="true" aria-label="游戏主界面">
+    <div class="mm-backdrop-clouds" aria-hidden="true"></div>
+    <div class="mm-card">
+      <!-- 1. Main Title Home View -->
+      <div id="mm-home-view" class="mm-view">
+        <div class="mm-emblem">道</div>
+        <h1 class="mm-title">青云问道</h1>
+        <p class="mm-subtitle">仙 境 漫 游 · 山 海 证 道</p>
+        <div class="mm-divider"></div>
+        <div class="mm-btn-list">
+          <button id="mm-btn-new" class="mm-btn mm-btn-primary" type="button">新游戏</button>
+          <button id="mm-btn-continue" class="mm-btn" type="button">继续游戏</button>
+          <button id="mm-btn-load" class="mm-btn" type="button">读取存档</button>
+          <button id="mm-btn-settings" class="mm-btn" type="button">设置</button>
+          <button id="mm-btn-quit" class="mm-btn mm-btn-danger" type="button">退出游戏</button>
+        </div>
+        <p id="mm-save-hint" class="mm-footer-hint">暂无存档，点击「新游戏」开启仙途</p>
+      </div>
+
+      <!-- 2. Character Creation View (人物创建界面) -->
+      <div id="mm-create-view" class="mm-view view-hidden">
+        <div class="mm-sub-head">
+          <div>
+            <h2 class="mm-sub-title">人物创建 · 择定灵根</h2>
+            <p class="mm-sub-desc">写下道号并择定本命五行，开局获赠对应属性普攻技能书与仙门服饰</p>
+          </div>
+          <button id="cc-btn-back" class="settings-back-btn" type="button">返回主界面</button>
+        </div>
+        <div class="mm-divider"></div>
+
+        <div class="cc-field-block">
+          <label class="cc-label" for="cc-name-input">角色道号</label>
+          <input id="cc-name-input" class="cc-name-input" type="text" maxlength="12" value="青云散修" placeholder="请输入角色名字（最多12字）" />
+        </div>
+
+        <div class="cc-field-block">
+          <span class="cc-label">选择本命五行属性</span>
+          <div id="cc-elem-grid" class="cc-elem-grid">
+            <button type="button" class="cc-elem-card active" data-cc-elem="metal">
+              <span class="cc-elem-glyph elem-metal">金</span>
+              <span class="cc-elem-name">金行灵根</span>
+              <span class="cc-elem-sub">锐金指 · 庚金白金袍</span>
+            </button>
+            <button type="button" class="cc-elem-card" data-cc-elem="wood">
+              <span class="cc-elem-glyph elem-wood">木</span>
+              <span class="cc-elem-name">木行灵根</span>
+              <span class="cc-elem-sub">青木弹 · 青木翠竹衫</span>
+            </button>
+            <button type="button" class="cc-elem-card" data-cc-elem="water">
+              <span class="cc-elem-glyph elem-water">水</span>
+              <span class="cc-elem-name">水行灵根</span>
+              <span class="cc-elem-sub">清泉弹 · 玄水沧浪衣</span>
+            </button>
+            <button type="button" class="cc-elem-card" data-cc-elem="fire">
+              <span class="cc-elem-glyph elem-fire">火</span>
+              <span class="cc-elem-name">火行灵根</span>
+              <span class="cc-elem-sub">炎阳弹 · 赤炎烈阳装</span>
+            </button>
+            <button type="button" class="cc-elem-card" data-cc-elem="earth">
+              <span class="cc-elem-glyph elem-earth">土</span>
+              <span class="cc-elem-name">土行灵根</span>
+              <span class="cc-elem-sub">厚土拳 · 厚土玄黄袍</span>
+            </button>
+          </div>
+        </div>
+
+        <div id="cc-gift-preview" class="cc-gift-preview">
+          开局赠礼：<strong>《锐金指》技能书 ×1</strong> ＋ <strong>庚金白金袍 ×1</strong>（存入储物背包，可在背包中研习与穿戴）
+        </div>
+
+        <div class="cc-actions-row">
+          <button id="cc-btn-enter" class="mm-btn mm-btn-primary cc-enter-btn" type="button">进入游戏</button>
+        </div>
+      </div>
+
+      <!-- 3. Load Save View (读取存档) -->
+      <div id="mm-load-view" class="mm-view view-hidden">
+        <div class="mm-sub-head">
+          <div>
+            <h2 class="mm-sub-title">读取存档</h2>
+            <p class="mm-sub-desc">选择已有修行记录继续仙途</p>
+          </div>
+          <button id="mm-load-back" class="settings-back-btn" type="button">返回主界面</button>
+        </div>
+        <div class="mm-divider"></div>
+        <div id="mm-save-list" class="mm-save-list"></div>
+      </div>
+
+      <!-- 4. Main Menu Settings View (主界面设置) -->
+      <div id="mm-settings-view" class="mm-view view-hidden">
+        <div class="mm-sub-head">
+          <div>
+            <h2 class="mm-sub-title">游戏设置</h2>
+            <p class="mm-sub-desc">所有选项将在进入世界后实时生效</p>
+          </div>
+          <button id="mm-settings-back" class="settings-back-btn" type="button">返回主界面</button>
+        </div>
+        <div class="mm-divider"></div>
+        <div id="mm-settings-list" class="settings-list">
+          <div class="setting-row">
+            <div class="setting-label-wrap"><span class="setting-label">声音开关</span></div>
+            <div class="setting-options">
+              <button type="button" class="opt-btn active" data-mm-setting="sound" data-value="on">开启</button>
+              <button type="button" class="opt-btn" data-mm-setting="sound" data-value="off">关闭</button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label-wrap"><span class="setting-label">分辨率</span></div>
+            <div class="setting-options">
+              <button type="button" class="opt-btn" data-mm-setting="resolution" data-value="low">低</button>
+              <button type="button" class="opt-btn active" data-mm-setting="resolution" data-value="high">高</button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label-wrap"><span class="setting-label">视野渲染距离</span></div>
+            <div class="setting-options">
+              <button type="button" class="opt-btn" data-mm-setting="viewDistance" data-value="low">低</button>
+              <button type="button" class="opt-btn active" data-mm-setting="viewDistance" data-value="medium">中</button>
+              <button type="button" class="opt-btn" data-mm-setting="viewDistance" data-value="high">高</button>
+              <button type="button" class="opt-btn" data-mm-setting="viewDistance" data-value="ultra">超高</button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label-wrap"><span class="setting-label">画质（光影）</span></div>
+            <div class="setting-options">
+              <button type="button" class="opt-btn" data-mm-setting="quality" data-value="low">低</button>
+              <button type="button" class="opt-btn active" data-mm-setting="quality" data-value="medium">中</button>
+              <button type="button" class="opt-btn" data-mm-setting="quality" data-value="high">高</button>
+            </div>
+          </div>
+          <div class="setting-row">
+            <div class="setting-label-wrap"><span class="setting-label">阴影质量</span></div>
+            <div class="setting-options">
+              <button type="button" class="opt-btn" data-mm-setting="shadowQuality" data-value="off">关闭</button>
+              <button type="button" class="opt-btn" data-mm-setting="shadowQuality" data-value="low">低</button>
+              <button type="button" class="opt-btn active" data-mm-setting="shadowQuality" data-value="medium">中</button>
+              <button type="button" class="opt-btn" data-mm-setting="shadowQuality" data-value="high">高</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. Main Menu Quit View -->
+      <div id="mm-quit-view" class="mm-view view-hidden">
+        <div class="mm-emblem">静</div>
+        <h2 class="mm-title" style="font-size:28px;">已退出游戏</h2>
+        <p class="mm-subtitle">山海暂歇，静候道友归来</p>
+        <div class="mm-divider"></div>
+        <div class="mm-btn-list">
+          <button id="mm-btn-back-home" class="mm-btn mm-btn-primary" type="button">返回主界面</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- World Loading Overlay (世界加载界面) -->
+  <div id="world-loading-overlay" class="world-loading-overlay hidden" role="status" aria-live="polite">
+    <div class="loading-box">
+      <div class="loading-emblem">青</div>
+      <h2 id="loading-title" class="loading-title">正在踏入青云山海…</h2>
+      <p id="loading-stage-text" class="loading-stage-text">正在初始化灵气天地与地形地脉…</p>
+      <div class="loading-bar-track">
+        <div id="loading-bar-fill" class="loading-bar-fill" style="width: 8%;"></div>
+      </div>
+      <span id="loading-pct" class="loading-pct">8%</span>
+    </div>
+  </div>
+
+  <canvas id="gl-canvas"></canvas>
+  <canvas id="nametag-canvas"></canvas>
+
+  <!-- Top-left Time System (十二时辰) + Protagonist HP, MP & Stamina Bars (Default 100 / 100) + Quick Bag/Skill Buttons -->
+  <div id="player-vitals" class="player-vitals" aria-label="主角状态">
+    <div id="shichen-bar" class="shichen-bar" title="十二时辰昼夜交替 (按 T 可快进一辰)">
+      <div class="shichen-left">
+        <span id="shichen-badge" class="shichen-badge">辰时</span>
+        <span id="shichen-phase" class="shichen-phase">食时晨光 · 白昼</span>
+      </div>
+      <div class="shichen-track">
+        <div id="shichen-fill" class="shichen-fill" style="width: 33.3%;"></div>
+      </div>
+    </div>
+    <div class="realm-status-row">
+      <div class="realm-status-left">
+        <span id="player-name-text" class="player-name-badge">青云散修</span>
+        <span id="player-realm-badge" class="player-realm-badge">练气一层</span>
+      </div>
+      <button id="hud-btn-cultivate" class="hud-cultivate-btn" type="button" title="运转周天吐纳提升修炼度 (击杀妖兽/强敌、采药挖矿亦可增长修为)">运转修为</button>
+    </div>
+    <div class="vital-row">
+      <span class="vital-label vital-cult-label">修炼</span>
+      <div class="vital-track">
+        <div id="cult-fill" class="vital-fill vital-cult-fill" style="width: 0%;"></div>
+        <span id="cult-text" class="vital-text">0 / 100</span>
+      </div>
+    </div>
+    <div class="vital-row">
+      <span class="vital-label vital-hp-label">气血</span>
+      <div class="vital-track">
+        <div id="hp-fill" class="vital-fill vital-hp-fill" style="width: 100%;"></div>
+        <span id="hp-text" class="vital-text">100 / 100</span>
+      </div>
+    </div>
+    <div class="vital-row">
+      <span class="vital-label vital-mp-label">灵力</span>
+      <div class="vital-track">
+        <div id="mp-fill" class="vital-fill vital-mp-fill" style="width: 100%;"></div>
+        <span id="mp-text" class="vital-text">100 / 100</span>
+      </div>
+    </div>
+    <div class="vital-row">
+      <span class="vital-label vital-st-label">体力</span>
+      <div class="vital-track">
+        <div id="st-fill" class="vital-fill vital-st-fill" style="width: 100%;"></div>
+        <span id="st-text" class="vital-text">100 / 100</span>
+      </div>
+    </div>
+    <div class="vital-stats-mini-row">
+      <span class="vital-mini-stat" title="主角当前攻击力（核心攻击 + 心法加成，普攻为 100% 攻击力）">攻 <strong id="player-atk-text">10</strong></span>
+      <span class="vital-mini-stat" title="主角当前防御力（受击实际伤害 = 攻击伤害 - 防御）">防 <strong id="player-def-text">5</strong></span>
+      <span class="vital-mini-stat" title="主角移速数值（初始为 1，装配移速心法可提升）">速 <strong id="player-speed-text">1</strong></span>
+      <span class="vital-mini-stat" title="当前已装配生效的心法数量（最多 2 门）">心法 <strong id="player-xinfa-count">0/2</strong></span>
+      <span class="vital-mini-stat vital-stone-stat" title="当前拥有的低阶灵石数量（挖灵矿、斩妖兽或青石城买卖可获取）">灵石 <strong id="player-stone-val">0</strong></span>
+    </div>
+    <div class="hud-quick-row">
+      <button id="hud-btn-bag" class="hud-quick-btn" type="button" title="打开背包 (快捷键 B)"><kbd>B</kbd> 背包</button>
+      <button id="hud-btn-skill" class="hud-quick-btn" type="button" title="打开功法 (快捷键 K)"><kbd>K</kbd> 功法</button>
+    </div>
+  </div>
+
+  <!-- Center Crosshair Overlay for Omni-Directional Basic Attack Mode (点击进入攻击模式，中间有个准星，全方位可攻击/可射天上) -->
+  <div id="combat-crosshair" class="combat-crosshair hidden" aria-hidden="true">
+    <div class="crosshair-ring"></div>
+    <span class="crosshair-tick tick-top"></span>
+    <span class="crosshair-tick tick-right"></span>
+    <span class="crosshair-tick tick-bottom"></span>
+    <span class="crosshair-tick tick-left"></span>
+    <span class="crosshair-dot"></span>
+    <span class="crosshair-mode-tag">攻击模式 · 360° 全向准星 (左键发射 / 右键或ESC退出)</span>
+  </div>
+
+  <!-- Displacement Skill Armed Mode Banner (位移技能待激发提示) -->
+  <div id="skill-aim-banner" class="skill-aim-banner hidden">
+    <span id="skill-aim-title">【疾金步】待激发模式</span>
+    <span class="skill-aim-hint"><strong>再次点击技能</strong>朝人物面对方向移动 · 右键取消</span>
+  </div>
+
+  <!-- Bottom-Center Collectible Spirit Herb Proximity Prompt -->
+  <button id="herb-collect-prompt" class="herb-collect-prompt hidden" type="button" title="采集灵药 (快捷键 C 或 H)">
+    <kbd>C</kbd> <span id="herb-collect-text">采集 · 一阶灵药</span>
+  </button>
+
+  <!-- Bottom-Center Interactive City Door Proximity Prompt (开门/关门) -->
+  <button id="door-interact-prompt" class="door-interact-prompt hidden" type="button" title="推开或合上大门 (快捷键 G)">
+    <kbd>G</kbd> <span id="door-interact-text">开门 · 藏经阁</span>
+  </button>
+
+  <!-- Bottom-Center Interactive Furnace Proximity Prompt (靠近按 U 键或点击进入炼丹炉 / 炼器炉) -->
+  <button id="furnace-interact-prompt" class="furnace-interact-prompt hidden" type="button" title="靠近后按 U 键或点击此处进入炼丹/炼器界面">
+    <kbd>U</kbd> <span id="furnace-interact-text">进入炼丹界面</span>
+  </button>
+
+  <!-- Bottom-Center Compact Five-Element Qi-Refining Skill Hotbar -->
+  <div id="skill-hotbar" class="skill-hotbar" aria-label="五行练气技能栏">
+    <div id="skill-buff-bar" class="skill-buff-bar"></div>
+    <div id="skill-cast-wrap" class="skill-cast-wrap hidden">
+      <span id="skill-cast-label" class="skill-cast-label">蓄气</span>
+      <div class="skill-cast-track"><div id="skill-cast-fill" class="skill-cast-fill"></div></div>
+    </div>
+    <div id="skill-elem-row" class="skill-elem-row">
+      <button type="button" class="elem-pill active" data-elem="metal">金</button>
+      <button type="button" class="elem-pill" data-elem="wood">木</button>
+      <button type="button" class="elem-pill" data-elem="water">水</button>
+      <button type="button" class="elem-pill" data-elem="fire">火</button>
+      <button type="button" class="elem-pill" data-elem="earth">土</button>
+      <span class="elem-switch-hint"><kbd>R</kbd> 切系</span>
+      <span class="elem-realm-sep" aria-hidden="true"></span>
+      <button type="button" class="realm-pill active" data-realm="lianqi">练气</button>
+      <button type="button" class="realm-pill" data-realm="zhuji">筑基</button>
+      <span class="elem-switch-hint"><kbd>V</kbd> 境</span>
+    </div>
+    <div id="skill-slot-row" class="skill-slot-row">
+      <button type="button" class="skill-slot-btn" data-skill-slot="0" id="hotbar-slot-0">
+        <span class="skill-slot-key">左键/J</span>
+        <span class="skill-slot-name">锐金指</span>
+        <span class="skill-slot-meta">普攻 · 免耗</span>
+        <div class="skill-cd-mask hidden"><span class="skill-cd-text"></span></div>
+      </button>
+      <button type="button" class="skill-slot-btn" data-skill-slot="1" id="hotbar-slot-1">
+        <span class="skill-slot-key">Q</span>
+        <span class="skill-slot-name">疾金步</span>
+        <span class="skill-slot-meta">12灵 · 5s</span>
+        <div class="skill-cd-mask hidden"><span class="skill-cd-text"></span></div>
+      </button>
+      <button type="button" class="skill-slot-btn" data-skill-slot="2" id="hotbar-slot-2">
+        <span class="skill-slot-key">E</span>
+        <span class="skill-slot-name">裂金锥</span>
+        <span class="skill-slot-meta">18灵 · 6.5s</span>
+        <div class="skill-cd-mask hidden"><span class="skill-cd-text"></span></div>
+      </button>
+      <div class="skill-slot-divider" aria-hidden="true"></div>
+      <button type="button" class="skill-slot-btn treasure-slot-btn empty-treasure" data-treasure-slot="treasure1" id="hotbar-treasure-1">
+        <span class="skill-slot-key">Z · 法宝1</span>
+        <span class="skill-slot-name">未装备</span>
+        <span class="skill-slot-meta">按 B 装备</span>
+        <div class="skill-cd-mask hidden"><span class="skill-cd-text"></span></div>
+      </button>
+      <button type="button" class="skill-slot-btn treasure-slot-btn empty-treasure" data-treasure-slot="treasure2" id="hotbar-treasure-2">
+        <span class="skill-slot-key">X · 法宝2</span>
+        <span class="skill-slot-name">未装备</span>
+        <span class="skill-slot-meta">按 B 装备</span>
+        <div class="skill-cd-mask hidden"><span class="skill-cd-text"></span></div>
+      </button>
+    </div>
+  </div>
+
+  <!-- Inventory UI Modal (背包 UI — B Key, Empty Slots Only) -->
+  <div id="bag-modal" class="cultivation-modal hidden">
+    <div class="cultivation-panel bag-panel">
+      <div class="cultivation-header">
+        <div class="cultivation-tabs">
+          <button id="tab-to-bag-1" class="cult-tab active" type="button">储物背包 (B)</button>
+          <button id="tab-to-skill-1" class="cult-tab" type="button">修行功法 (K)</button>
+        </div>
+        <button id="bag-close" class="worldmap-close" type="button">关闭 (ESC)</button>
+      </div>
+
+      <div class="bag-body">
+        <!-- Left Side: Current Equipment (服装 / 法宝1 / 法宝2 / 福禄 / 战斗丹药 — Empty Slots) -->
+        <div class="bag-equip-col">
+          <div class="bag-section-title">当前装备</div>
+          <div id="bag-equip-list" class="bag-equip-list">
+            <div class="equip-slot" data-equip-slot="outfit">
+              <span class="equip-slot-tag">服装</span>
+              <div class="equip-slot-box">
+                <span class="equip-item-icon">空</span>
+                <div class="equip-item-meta">
+                  <span class="equip-item-name">未装备</span>
+                  <span class="equip-item-desc">服装栏位</span>
+                </div>
+              </div>
+            </div>
+            <div class="equip-slot" data-equip-slot="flyingSword">
+              <span class="equip-slot-tag">飞剑</span>
+              <div class="equip-slot-box">
+                <span class="equip-item-icon">空</span>
+                <div class="equip-item-meta">
+                  <span class="equip-item-name">未装备</span>
+                  <span class="equip-item-desc">御剑飞行栏位</span>
+                </div>
+              </div>
+            </div>
+            <div class="equip-slot" data-equip-slot="treasure1">
+              <span class="equip-slot-tag">法宝1</span>
+              <div class="equip-slot-box">
+                <span class="equip-item-icon">空</span>
+                <div class="equip-item-meta">
+                  <span class="equip-item-name">未装备</span>
+                  <span class="equip-item-desc">主法宝栏位</span>
+                </div>
+              </div>
+            </div>
+            <div class="equip-slot" data-equip-slot="treasure2">
+              <span class="equip-slot-tag">法宝2</span>
+              <div class="equip-slot-box">
+                <span class="equip-item-icon">空</span>
+                <div class="equip-item-meta">
+                  <span class="equip-item-name">未装备</span>
+                  <span class="equip-item-desc">副法宝栏位</span>
+                </div>
+              </div>
+            </div>
+            <div class="equip-slot" data-equip-slot="fulu">
+              <span class="equip-slot-tag">福禄</span>
+              <div class="equip-slot-box">
+                <span class="equip-item-icon">空</span>
+                <div class="equip-item-meta">
+                  <span class="equip-item-name">未装备</span>
+                  <span class="equip-item-desc">福禄栏位</span>
+                </div>
+              </div>
+            </div>
+            <div class="equip-slot" data-equip-slot="pill">
+              <span class="equip-slot-tag">战斗丹药</span>
+              <div class="equip-slot-box">
+                <span class="equip-item-icon">空</span>
+                <div class="equip-item-meta">
+                  <span class="equip-item-name">未装备</span>
+                  <span class="equip-item-desc">战斗丹药栏位</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Side: 48-Slot Inventory Grid -->
+        <div class="bag-grid-col">
+          <div class="bag-section-header">
+            <span class="bag-section-title">行囊格子</span>
+            <div class="bag-header-right">
+              <span id="bag-stone-label" class="bag-stone-badge">低阶灵石：0</span>
+              <span id="bag-count-label" class="bag-section-sub">已用 0 / 48 格</span>
+            </div>
+          </div>
+          <div id="bag-grid" class="bag-grid"></div>
+          <div id="bag-detail-bar" class="bag-detail-bar">
+            <div class="bag-detail-info">
+              <span id="bag-detail-name" class="bag-detail-name">点击行囊物品或左侧装备槽查看详情</span>
+              <span id="bag-detail-desc" class="bag-detail-desc">开局行囊为空，可采集灵药、开采灵矿、斩杀妖兽或前往青石城商铺交易获取</span>
+            </div>
+            <div class="bag-action-wrap">
+              <button id="bag-action-btn" class="cult-action-btn hidden" type="button">装备至法宝1</button>
+              <button id="bag-action-btn-2" class="cult-action-btn hidden" type="button">装备至法宝2</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Cultivation Techniques UI Modal (功法 UI — K Key: 心法 & 武技, Empty Slots Only) -->
+  <div id="skill-modal" class="cultivation-modal hidden">
+    <div class="cultivation-panel skill-panel">
+      <div class="cultivation-header">
+        <div class="cultivation-tabs">
+          <button id="tab-to-bag-2" class="cult-tab" type="button">储物背包 (B)</button>
+          <button id="tab-to-skill-2" class="cult-tab active" type="button">修行功法 (K)</button>
+        </div>
+        <div class="skill-filter-tabs">
+          <button class="skill-filter-btn active" data-skill-filter="all" type="button">全部</button>
+          <button class="skill-filter-btn" data-skill-filter="xinfa" type="button">心法</button>
+          <button class="skill-filter-btn" data-skill-filter="wuji" type="button">武技</button>
+        </div>
+        <button id="skill-close" class="worldmap-close" type="button">关闭 (ESC)</button>
+      </div>
+
+      <div id="skill-body" class="skill-body">
+        <!-- Left Column: 心法 (Mental Cultivation Methods — 2 Active Slots + 8 Learned Xinfa) -->
+        <div id="skill-col-xinfa" class="skill-col">
+          <div class="bag-section-header">
+            <span class="bag-section-title">心法（装配生效 · 双栏位）</span>
+            <span id="active-xinfa-label" class="bag-section-sub">已装配 0 / 2</span>
+          </div>
+          <div id="xinfa-list" class="xinfa-col-wrap"></div>
+        </div>
+
+        <!-- Right Column: 武技 (1 Basic Attack Slot + 2 Active Skill Slots + Free Loadout Mixing) -->
+        <div id="skill-col-wuji" class="skill-col">
+          <div class="bag-section-header">
+            <span class="bag-section-title">武技（1普攻格 + 2技能格 · 自由搭配）</span>
+            <span id="active-wuji-label" class="bag-section-sub">已装配 3 / 3</span>
+          </div>
+          <div id="wuji-list" class="wuji-elem-list"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top-right Live Minimap (Kept) -->
+  <div id="minimap-box" class="minimap-box" title="点击或按 M 展开大地图">
+    <span class="minimap-north">北</span>
+    <canvas id="minimap-canvas"></canvas>
+    <div class="minimap-caption"><kbd>M</kbd> 全图</div>
+  </div>
+
+  <!-- Enlarged World Map Modal (Kept, toggled with M key or clicking Minimap) -->
+  <div id="worldmap-modal" class="worldmap-modal hidden">
+    <div class="worldmap-panel">
+      <div class="worldmap-header">
+        <span class="worldmap-title">青云山海舆图</span>
+        <button id="worldmap-close" class="worldmap-close" type="button">收起 (M)</button>
+      </div>
+      <div class="worldmap-canvas-wrap">
+        <canvas id="worldmap-canvas"></canvas>
+      </div>
+      <div id="worldmap-info" class="worldmap-info">低云平原</div>
+    </div>
+  </div>
+
+  <!-- ESC Pause & Settings Menu Modal -->
+  <div id="esc-menu-modal" class="esc-menu-modal hidden">
+    <div class="esc-menu-card">
+      <!-- 1. Main ESC Menu View -->
+      <div id="esc-main-view" class="esc-view">
+        <div class="esc-menu-header">
+          <h2 class="esc-menu-title">游戏菜单</h2>
+          <p class="esc-menu-sub">按 <kbd>ESC</kbd> 返回游戏</p>
+        </div>
+        <div class="esc-menu-divider"></div>
+        <div class="esc-btn-list">
+          <button id="btn-resume" class="menu-btn menu-btn-primary" type="button">继续游戏</button>
+          <button id="btn-open-save" class="menu-btn" type="button">保存存档</button>
+          <button id="btn-open-bestiary" class="menu-btn" type="button">妖兽图鉴</button>
+          <button id="btn-open-settings" class="menu-btn" type="button">设置</button>
+          <button id="btn-cheat-all" class="menu-btn menu-btn-cheat" type="button">作弊（获得全部功法丹药法宝）</button>
+          <button id="btn-return-title" class="menu-btn" type="button">返回主界面</button>
+          <button id="btn-quit-game" class="menu-btn menu-btn-danger" type="button">退出游戏</button>
+        </div>
+      </div>
+
+      <!-- 1A. Save Slots Sub-View (保存存档) -->
+      <div id="esc-save-view" class="esc-view view-hidden">
+        <div class="esc-settings-header">
+          <div>
+            <h2 class="esc-menu-title">保存存档</h2>
+            <p class="esc-menu-sub">选择栏位保存当前修为、灵石、功法与行囊</p>
+          </div>
+          <button id="btn-save-back" class="settings-back-btn" type="button">返回菜单</button>
+        </div>
+        <div class="esc-menu-divider"></div>
+        <div id="esc-save-list" class="mm-save-list"></div>
+      </div>
+
+      <!-- 1B. Monster Bestiary Sub-View (妖兽图鉴 · 全境境界数值一览) -->
+      <div id="esc-bestiary-view" class="esc-view view-hidden">
+        <div class="esc-settings-header">
+          <div>
+            <h2 class="esc-menu-title">妖兽图鉴</h2>
+            <p class="esc-menu-sub" id="bestiary-summary-sub">全境妖兽各境界气血、伤害、移速与招式数值一览</p>
+          </div>
+          <button id="btn-bestiary-back" class="settings-back-btn" type="button">返回菜单</button>
+        </div>
+        <div class="esc-menu-divider"></div>
+        <div id="bestiary-filter-bar" class="bestiary-filter-bar">
+          <button type="button" class="bestiary-filter-btn active" data-bestiary-filter="all">全部</button>
+          <button type="button" class="bestiary-filter-btn" data-bestiary-filter="lianqi_normal">练气普通</button>
+          <button type="button" class="bestiary-filter-btn" data-bestiary-filter="lianqi_elite">练气精英</button>
+          <button type="button" class="bestiary-filter-btn" data-bestiary-filter="boss">区域首领</button>
+          <button type="button" class="bestiary-filter-btn" data-bestiary-filter="zhuji_normal">筑基普通</button>
+          <button type="button" class="bestiary-filter-btn" data-bestiary-filter="zhuji_elite">筑基精英</button>
+        </div>
+        <div id="bestiary-list" class="bestiary-list"></div>
+      </div>
+
+      <!-- 2. Settings Sub-View -->
+      <div id="esc-settings-view" class="esc-view view-hidden">
+        <div class="esc-settings-header">
+          <h2 class="esc-menu-title">游戏设置</h2>
+          <button id="btn-back-main" class="settings-back-btn" type="button">返回菜单</button>
+        </div>
+        <div class="esc-menu-divider"></div>
+
+        <div class="settings-list">
+          <!-- 声音开关 -->
+          <div class="setting-row">
+            <div class="setting-label-wrap">
+              <span class="setting-label">声音开关</span>
+              <span id="setting-sound-info" class="setting-desc">环境风声与古琴洞箫背景乐已开启</span>
+            </div>
+            <div class="setting-options" data-group="sound">
+              <button type="button" class="opt-btn active" data-setting="sound" data-value="on">开启</button>
+              <button type="button" class="opt-btn" data-setting="sound" data-value="off">关闭</button>
+            </div>
+          </div>
+
+          <!-- 分辨率高低 -->
+          <div class="setting-row">
+            <div class="setting-label-wrap">
+              <span class="setting-label">分辨率</span>
+              <span id="setting-res-info" class="setting-desc">高 · 原生超清渲染缓冲</span>
+            </div>
+            <div class="setting-options" data-group="resolution">
+              <button type="button" class="opt-btn" data-setting="resolution" data-value="low">低</button>
+              <button type="button" class="opt-btn active" data-setting="resolution" data-value="high">高</button>
+            </div>
+          </div>
+
+          <!-- 视野渲染距离：低 / 中(默认) / 高 / 超高 -->
+          <div class="setting-row">
+            <div class="setting-label-wrap">
+              <span class="setting-label">视野渲染距离</span>
+              <span id="setting-view-info" class="setting-desc">中 · 远裁面 13500m / 植被景物 4800m</span>
+            </div>
+            <div class="setting-options" data-group="viewDistance">
+              <button type="button" class="opt-btn" data-setting="viewDistance" data-value="low">低</button>
+              <button type="button" class="opt-btn active" data-setting="viewDistance" data-value="medium">中</button>
+              <button type="button" class="opt-btn" data-setting="viewDistance" data-value="high">高</button>
+              <button type="button" class="opt-btn" data-setting="viewDistance" data-value="ultra">超高</button>
+            </div>
+          </div>
+
+          <!-- 画质（主要是光影）：低 / 中(默认) / 高 -->
+          <div class="setting-row">
+            <div class="setting-label-wrap">
+              <span class="setting-label">画质（光影）</span>
+              <span id="setting-qual-info" class="setting-desc">中 · 法线凹凸 / 边缘高光 / 半分辨率 HDR 辉光</span>
+            </div>
+            <div class="setting-options" data-group="quality">
+              <button type="button" class="opt-btn" data-setting="quality" data-value="low">低</button>
+              <button type="button" class="opt-btn active" data-setting="quality" data-value="medium">中</button>
+              <button type="button" class="opt-btn" data-setting="quality" data-value="high">高</button>
+            </div>
+          </div>
+
+          <!-- 阴影质量：关闭 / 低 / 中(默认) / 高 -->
+          <div class="setting-row">
+            <div class="setting-label-wrap">
+              <span class="setting-label">阴影质量</span>
+              <span id="setting-shadow-info" class="setting-desc">中 · 1024×1024 深度图 / 4点泊松软阴影</span>
+            </div>
+            <div class="setting-options" data-group="shadowQuality">
+              <button type="button" class="opt-btn" data-setting="shadowQuality" data-value="off">关闭</button>
+              <button type="button" class="opt-btn" data-setting="shadowQuality" data-value="low">低</button>
+              <button type="button" class="opt-btn active" data-setting="shadowQuality" data-value="medium">中</button>
+              <button type="button" class="opt-btn" data-setting="shadowQuality" data-value="high">高</button>
+            </div>
+          </div>
+
+          <!-- 脚底接触阴影（Blob Shadow）：开启(默认) / 关闭 -->
+          <div class="setting-row">
+            <div class="setting-label-wrap">
+              <span class="setting-label">脚底接触阴影</span>
+              <span id="setting-blob-info" class="setting-desc">开启 · 主角/妖兽/近处树干贴地软阴影（关实时阴影不发飘）</span>
+            </div>
+            <div class="setting-options" data-group="blobShadow">
+              <button type="button" class="opt-btn active" data-setting="blobShadow" data-value="on">开启</button>
+              <button type="button" class="opt-btn" data-setting="blobShadow" data-value="off">关闭</button>
+            </div>
+          </div>
+
+          <!-- 远景距离雾效（大气透视）：开启(默认) / 关闭 -->
+          <div class="setting-row">
+            <div class="setting-label-wrap">
+              <span class="setting-label">远景距离雾效</span>
+              <span id="setting-fog-info" class="setting-desc">开启 · 远山与林海平滑融入天光淡青雾色，增强空间层次</span>
+            </div>
+            <div class="setting-options" data-group="distanceFog">
+              <button type="button" class="opt-btn active" data-setting="distanceFog" data-value="on">开启</button>
+              <button type="button" class="opt-btn" data-setting="distanceFog" data-value="off">关闭</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Quit Game Exited View -->
+      <div id="esc-quit-view" class="esc-view view-hidden">
+        <div class="esc-menu-header">
+          <h2 class="esc-menu-title">已退出游戏</h2>
+          <p class="esc-menu-sub">渲染循环与音频引擎已安全停止</p>
+        </div>
+        <div class="esc-menu-divider"></div>
+        <div class="esc-btn-list">
+          <button id="btn-reenter" class="menu-btn menu-btn-primary" type="button">重新进入游戏</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standalone Alchemy Furnace Modal (独立炼丹界面 · 丹道熔炉) -->
+  <div id="alchemy-modal" class="panel-modal hidden" role="dialog" aria-modal="true" aria-label="炼丹界面">
+    <div class="panel-card craft-card craft-alchemy">
+      <div class="panel-head">
+        <div class="craft-head-title">
+          <span class="craft-badge alchemy">丹</span>
+          <div>
+            <h2 class="craft-title">青铜炼丹炉 · 丹道熔炉</h2>
+            <p class="craft-sub">暖橙丹火融百草，青白药烟凝仙丹</p>
+          </div>
+        </div>
+        <div class="craft-head-actions">
+          <button id="alchemy-pickup-btn" class="craft-pickup-btn" type="button">收回至背包</button>
+          <button id="alchemy-close" class="panel-close" type="button" aria-label="关闭炼丹界面">×</button>
+        </div>
+      </div>
+      <div class="craft-body">
+        <div class="craft-left">
+          <div class="craft-section-title">丹方总录（点击选择丹方）</div>
+          <div id="alchemy-recipe-list" class="craft-recipe-list"></div>
+        </div>
+        <div class="craft-right">
+          <div class="craft-furnace-banner alchemy">
+            <div class="craft-furnace-emblem" id="alchemy-selected-icon">丹</div>
+            <div class="craft-furnace-meta">
+              <div class="craft-selected-name" id="alchemy-selected-name">请选择丹方</div>
+              <div class="craft-selected-tier" id="alchemy-selected-tier">一品灵丹</div>
+            </div>
+          </div>
+          <div class="craft-detail-box">
+            <div class="craft-detail-row"><span>境界要求</span><strong id="alchemy-realm-text">练气期</strong></div>
+            <div class="craft-detail-row"><span>所需材料</span><strong id="alchemy-req-text">—</strong></div>
+            <div class="craft-detail-row"><span>消耗灵石</span><strong id="alchemy-stone-text">0 低阶灵石</strong></div>
+            <div class="craft-detail-row"><span>成丹效果</span><strong id="alchemy-effect-text">—</strong></div>
+            <div class="craft-detail-row"><span>当前灵力</span><strong id="alchemy-mp-text">100 / 100</strong></div>
+          </div>
+          <div id="alchemy-status-msg" class="craft-status-msg">择定丹方后点击「开炉炼丹」，成品将自动存入背包。</div>
+          <button id="alchemy-craft-btn" class="craft-main-btn alchemy" type="button">开炉炼丹</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standalone Artifact Forging Furnace Modal (独立炼器界面 · 百炼神炉) -->
+  <div id="forging-modal" class="panel-modal hidden" role="dialog" aria-modal="true" aria-label="炼器界面">
+    <div class="panel-card craft-card craft-forging">
+      <div class="panel-head">
+        <div class="craft-head-title">
+          <span class="craft-badge forging">锻</span>
+          <div>
+            <h2 class="craft-title">玄铁炼器炉 · 百炼神炉</h2>
+            <p class="craft-sub">暗金地火熔玄铁，铁砧百锤铸灵器</p>
+          </div>
+        </div>
+        <div class="craft-head-actions">
+          <button id="forging-pickup-btn" class="craft-pickup-btn" type="button">收回至背包</button>
+          <button id="forging-close" class="panel-close" type="button" aria-label="关闭炼器界面">×</button>
+        </div>
+      </div>
+      <div class="craft-body">
+        <div class="craft-left">
+          <div class="craft-section-title">器谱总录（点击选择器谱）</div>
+          <div id="forging-recipe-list" class="craft-recipe-list"></div>
+        </div>
+        <div class="craft-right">
+          <div class="craft-furnace-banner forging">
+            <div class="craft-furnace-emblem" id="forging-selected-icon">锻</div>
+            <div class="craft-furnace-meta">
+              <div class="craft-selected-name" id="forging-selected-name">请选择器谱</div>
+              <div class="craft-selected-tier" id="forging-selected-tier">一阶法器</div>
+            </div>
+          </div>
+          <div class="craft-detail-box">
+            <div class="craft-detail-row"><span>境界要求</span><strong id="forging-realm-text">练气期</strong></div>
+            <div class="craft-detail-row"><span>所需材料</span><strong id="forging-req-text">—</strong></div>
+            <div class="craft-detail-row"><span>消耗灵石</span><strong id="forging-stone-text">0 低阶灵石</strong></div>
+            <div class="craft-detail-row"><span>成器说明</span><strong id="forging-effect-text">—</strong></div>
+            <div class="craft-detail-row"><span>当前灵力</span><strong id="forging-mp-text">100 / 100</strong></div>
+          </div>
+          <div id="forging-status-msg" class="craft-status-msg">择定器谱后点击「引火锻造」，成品将自动存入背包。</div>
+          <button id="forging-craft-btn" class="craft-main-btn forging" type="button">引火锻造</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Standalone Qingshi City Merchant Shop Modal (青石城商人买卖界面) -->
+  <div id="shop-modal" class="panel-modal hidden" role="dialog" aria-modal="true" aria-label="青石城商铺交易">
+    <div class="panel-card shop-card">
+      <div class="panel-head">
+        <div class="craft-head-title">
+          <span class="craft-badge shop-badge">商</span>
+          <div>
+            <h2 id="shop-merchant-title" class="craft-title">青石城商铺 · 灵石交易</h2>
+            <p id="shop-merchant-sub" class="craft-sub">以低阶灵石购置丹药、符箓、炉鼎与灵器，或寄售行囊收获</p>
+          </div>
+        </div>
+        <div class="craft-head-actions">
+          <span class="bag-stone-badge">低阶灵石：<strong id="shop-stone-val">0</strong></span>
+          <button id="shop-close" class="panel-close" type="button" aria-label="关闭商铺">×</button>
+        </div>
+      </div>
+      <div class="shop-toolbar">
+        <div class="shop-tabs">
+          <button id="shop-tab-buy" class="shop-tab active" type="button">购置货物</button>
+          <button id="shop-tab-sell" class="shop-tab" type="button">出售行囊</button>
+        </div>
+        <span class="shop-rate-note">青石城行规：收购价约为售价二至三成，稀缺灵材按品阶计价</span>
+      </div>
+      <div id="shop-item-list" class="shop-item-list"></div>
+      <div id="shop-status-msg" class="craft-status-msg shop-status-bar">点击「购买」或「出售」即可与掌柜即时结算低阶灵石。</div>
+    </div>
+  </div>
+
+  <!-- Standalone Library Pavilion Modal (青石城藏经阁 · 武技与心法购买研习界面) -->
+  <div id="library-modal" class="panel-modal hidden" role="dialog" aria-modal="true" aria-label="藏经阁典籍">
+    <div class="panel-card shop-card library-card">
+      <div class="panel-head">
+        <div class="craft-head-title">
+          <span class="craft-badge library-badge">经</span>
+          <div>
+            <h2 id="library-title" class="craft-title">藏经阁 · 功法与心法典籍</h2>
+            <p class="craft-sub">所有武技与心法皆须先在此购买习得，方可装配施展（筑基期功法需突破筑基后方能催动）</p>
+          </div>
+        </div>
+        <div class="craft-head-actions">
+          <span class="bag-stone-badge">低阶灵石：<strong id="library-stone-val">0</strong></span>
+          <button id="library-close" class="panel-close" type="button" aria-label="关闭藏经阁">×</button>
+        </div>
+      </div>
+      <div class="shop-toolbar">
+        <div id="library-filter-tabs" class="shop-tabs">
+          <button class="shop-tab active" data-lib-filter="all" type="button">全部典籍</button>
+          <button class="shop-tab" data-lib-filter="xinfa" type="button">心法 (8)</button>
+          <button class="shop-tab" data-lib-filter="lianqi_wuji" type="button">练气武技 (15)</button>
+          <button class="shop-tab" data-lib-filter="zhuji_wuji" type="button">筑基武技 (10)</button>
+        </div>
+        <span id="library-realm-note" class="shop-rate-note">当前境界：练气一层</span>
+      </div>
+      <div id="library-list" class="shop-item-list"></div>
+      <div id="library-status-msg" class="craft-status-msg shop-status-bar">择定典籍后点击「购买习得」，习得后请按 K 键打开功法界面装配。</div>
+    </div>
+  </div>
+
+  <!-- Minimal WebGL2 fallback message -->
+  <div id="error-overlay" class="error-overlay hidden">
+    <div class="error-box">
+      <h2>无法初始化 WebGL2 渲染</h2>
+      <p id="error-message">请使用支持 WebGL2 的现代浏览器（Chrome / Edge / Firefox）开启硬件加速后重试。</p>
+    </div>
+  </div>
+
+  <script src="src/math.js"></script>
+  <script src="src/noise.js"></script>
+  <script src="src/collision.js"></script>
+  <script src="src/terrain.js"></script>
+  <script src="src/meshBuilder.js"></script>
+  <script src="src/qingshiCity.js"></script>
+  <script src="src/landmarks.js"></script>
+  <script src="src/nature.js"></script>
+  <script src="src/shaders.js"></script>
+  <script src="src/character.js"></script>
+  <script src="src/monsters.js"></script>
+  <script src="src/skills.js"></script>
+  <script src="src/treasures.js"></script>
+  <script src="src/outfits.js"></script>
+  <script src="src/herbs.js"></script>
+  <script src="src/ores.js"></script>
+  <script src="src/drops.js"></script>
+  <script src="src/furnaces.js"></script>
+  <script src="src/npcs.js"></script>
+  <script src="src/camera.js"></script>
+  <script src="src/renderer.js"></script>
+  <script src="src/minimap.js"></script>
+  <script src="src/audio.js"></script>
+  <script src="src/main.js"></script>
+</body>
+</html>
